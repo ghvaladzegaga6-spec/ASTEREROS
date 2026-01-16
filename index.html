@@ -4,6 +4,12 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>ASTER EROS - Live Galaxy</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+
     <style>
         body { margin: 0; overflow: hidden; background: #000; font-family: 'Segoe UI', sans-serif; touch-action: none; }
         #gui {
@@ -13,39 +19,45 @@
             border-radius: 10px; z-index: 100; color: white; transition: 0.3s;
         }
         @media (max-width: 600px) {
-            #gui { width: 80%; left: 10%; top: 10px; }
-            #modal { width: 90% !important; }
+            #gui { width: 85%; left: 5%; top: 10px; }
+            #modal { width: 90% !important; padding: 15px !important; }
         }
         #gui.minimized { width: 50px; height: 20px; overflow: hidden; opacity: 0.5; }
         h2 { margin: 0 0 10px 0; font-size: 13px; color: #ffcc00; letter-spacing: 2px; text-align: center; }
         input, textarea {
             width: 100%; background: rgba(255,255,255,0.1); border: 0.5px solid #444;
             color: white; padding: 10px; margin-bottom: 8px; border-radius: 4px;
-            box-sizing: border-box; outline: none; font-size: 14px;
+            box-sizing: border-box; outline: none; font-size: 13px;
         }
+        .card-extra { display: flex; gap: 8px; }
         .btn { width: 100%; padding: 12px; border: none; border-radius: 4px; cursor: pointer;
                font-weight: bold; font-size: 11px; text-transform: uppercase; margin-bottom: 5px; }
         .btn-buy { background: #ffcc00; color: #000; }
-        .btn-pay { background: #00ff88; color: #000; }
+        .btn-pay { background: #00ff88; color: #000; margin-top: 5px; }
         .btn-back { background: #444; color: #fff; }
         .btn-search { background: #222; color: #aaa; border: 0.5px solid #444; }
-        .status { font-size: 12px; font-weight: bold; margin-bottom: 8px; }
+        
+        .info-header { font-size: 16px; color: #ffcc00; font-weight: bold; margin-bottom: 5px; display: block; }
+        .status-text { font-size: 13px; margin-bottom: 10px; display: block; }
         .free { color: #00ff88; }
         .sold { color: #ff4d4d; }
+        
         #modal { display: none; position: fixed; top: 50%; left: 50%;
                  transform: translate(-50%, -50%); background: #0d0d0d; border: 1px solid #ffcc00; 
-                 padding: 20px; border-radius: 12px; z-index: 1000; width: 280px; color: white; }
+                 padding: 20px; border-radius: 12px; z-index: 1000; width: 280px; color: white;
+                 box-shadow: 0 0 50px rgba(0,0,0,0.8); }
         .overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
                    background: rgba(0,0,0,0.85); z-index: 999; }
         #loader { position: fixed; top:0; left:0; width:100%; height:100%; background:#000; 
-                  display:flex; flex-direction:column; align-items:center; justify-content:center; z-index:10001; color:#ffcc00; }
+                  display:flex; flex-direction:column; align-items:center;
+                  justify-content:center; z-index:10001; color:#ffcc00; }
     </style>
 </head>
 <body>
 
 <div id="loader">
-    <h1>ASTER EROS</h1>
-    <p>უკავშირდება გალაქტიკას...</p>
+    <h1 style="letter-spacing:10px;">ASTER EROS</h1>
+    <p style="font-size:10px; letter-spacing:2px;">უკავშირდება გალაქტიკას...</p>
 </div>
 
 <div id="gui">
@@ -54,7 +66,7 @@
         <span id="toggle" style="cursor:pointer; font-size:18px;">[-]</span>
     </div>
     <div id="content">
-        <input type="number" id="searchId" placeholder="შეიყვანე ID">
+        <input type="text" id="searchField" placeholder="ID ან სახელი">
         <button class="btn btn-search" id="searchBtn">ძებნა</button>
         <div id="info-box"><p style="font-size:10px; color:#666; text-align:center;">აირჩიეთ ვარსკვლავი</p></div>
     </div>
@@ -62,30 +74,25 @@
 
 <div class="overlay" id="overlay"></div>
 <div id="modal">
-    <h3 style="color:#ffcc00; margin-top:0;">შესყიდვა - 30 GEL</h3>
+    <h3 id="modalTitle" style="color:#ffcc00; font-size:14px; margin-top:0; text-align:center;">შესყიდვა</h3>
     <textarea id="uMsg" rows="2" placeholder="სამუდამო წერილი..."></textarea>
-    <input type="text" id="uCode" maxlength="8" placeholder="8-ნიშნა საიდუმლო კოდი">
-    <input type="text" id="cardNumber" placeholder="ბარათის ნომერი" maxlength="16">
-    <button class="btn btn-pay" id="payBtn">გადახდა</button>
-    <button class="btn btn-back" id="backBtn">უკან</button>
+    
+    <div style="border-top: 1px solid #333; margin: 10px 0; padding-top: 10px;">
+        <input type="text" id="cardNumber" placeholder="ბარათის ნომერი" maxlength="16">
+        <div class="card-extra">
+            <input type="text" id="expDate" placeholder="MM/YY" maxlength="5">
+            <input type="password" id="cvv" placeholder="CVV" maxlength="3">
+        </div>
+        <button class="btn btn-pay" id="payBtn">გადახდა</button>
+        <button class="btn btn-back" id="backBtn">უკან</button>
+    </div>
 </div>
 
-<script type="importmap">
-    { 
-        "imports": { 
-            "three": "https://unpkg.com/three@0.160.0/build/three.module.js", 
-            "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/",
-            "firebase/app": "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js",
-            "firebase/database": "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js"
-        } 
-    }
-</script>
+<script>
+    const starNames = ["Sirius", "Canopus", "Arcturus", "Alpha Centauri", "Vega", "Capella", "Rigel", "Procyon", "Achernar", "Betelgeuse", "Hadar", "Altair", "Acrux", "Aldebaran", "Spica", "Antares", "Pollux", "Fomalhaut", "Deneb", "Mimosa", "Regulus", "Adhara", "Castor", "Gacrux", "Shaula", "Bellatrix", "Elnath", "Miaplacidus", "Alnilam", "Alnair", "Alnitak", "Alioth", "Dubhe", "Mirfak", "Wezen", "Sargas", "Kaus Australis", "Avior", "Alkaid", "Menkalinan", "Atria", "Alhena", "Peacock", "Alsephina", "Mirzam", "Alphard", "Hamal", "Polaris", "Algieba", "Diphda", "Nunki", "Menkent", "Mirach", "Alpheratz", "Saiph", "Kocab", "Alcas", "Algol", "Tiaki", "Almach", "Eltanin", "Sadr", "Naos", "Kadir", "Enif", "Gienah", "Aludra", "Ankaa", "Gemma", "Suhail", "Denebola", "Albaldah", "Markab", "Menkar", "Alnitah", "Zubeneschamali", "Kraz", "Scheat", "Alphecca", "Alderamin", "Sabik", "Alsuhail", "Epsilon", "Etamin", "Menkarlina", "Zavijava", "Alshain", "Musalha", "Deneb Kaitos", "Talitha", "Zaurak", "Kuma", "Rasalgethi", "Zosma", "Tarf", "Almach", "Adhafera", "Shedar", "Caph", "Ruchbah", "Tsih", "Schedir", "Seguin", "Izar", "Nekkar", "Seginus", "Nunki", "Ascella", "Kaus Borealis", "Kaus Media", "Arkab", "Alnasl", "Alya", "Arietis", "Sheratan", "Mesarthim", "Hamal", "Botein", "Zaurak", "Aldhanab", "Azha", "Acamar", "Beid", "Keid", "Angetenar", "Theemin", "Sceptrum", "Kursi", "Zibal", "Alkalurops", "Zibal", "Sceptrum", "Mothallah", "Metallah", "Sadalmelik", "Sadalsuud", "Sadachbia", "Skat", "Ancha", "Situla", "Homam", "Matar", "Baham", "Enif", "Biham", "Deneb Algedi", "Dabih", "Nashira", "Alshat", "Okul", "Deneb", "Sadr", "Gienah", "Azelfafage", "Ruchba", "Eltanin", "Rastaban", "Alrakis", "Kuma", "Grumium", "Nodus", "Tyl", "Aldhibah", "Edasich", "Gianfar", "Thuban", "Kochab", "Pherkad", "Yildun", "Polaris", "Kaffaljidhma", "Menkar", "Baten Kaitos", "Deneb Kaitos", "Mira", "Zaurak", "Sheratan", "Mesarthim", "Hamal", "Alcyone", "Electra", "Maia", "Merope", "Taygeta", "Celaeno", "Asterope", "Pleione", "Atlas", "Hyades", "Ain", "Aldebaran", "Elnath", "Alheka", "Meissa", "Betelgeuse", "Bellatrix", "Mintaka", "Alnilam", "Alnitak", "Saiph", "Rigel", "Sirius", "Murzim", "Muliphein", "Wezen", "Adhara", "Aludra", "Furud", "Procyon", "Gomeisa", "Castor", "Pollux", "Alhena", "Tejat", "Mebsuta", "Propus", "Wasat", "Alzirr", "Alphard", "Regulus", "Denebola", "Zosma", "Chertan", "Adhafera", "Algieba", "Alterf", "Rasalas", "Spica", "Heze", "Zavijava", "Zaniah", "Syrma", "Rijl", "Antares", "Graffias", "Dschubba", "Sargas", "Shaula", "Lesath", "Jabhat", "Girtab", "Alniyat", "Vega", "Sheliak", "Sulafat", "Altair", "Tarazed", "Alshain", "Deneb", "Sadr", "Gienah", "Albireo", "Fomalhaut", "Markab", "Scheat", "Algenib", "Enif", "Homam", "Matar", "Baham", "Sadalmelik", "Sadalsuud", "Sadachbia", "Skat", "Achernar", "Ankaa", "Acamar", "Phact", "Wazn", "Canopus", "Miaplacidus", "Avior", "Aspidiske", "Suhail", "Alsephina", "Tureis", "Naos", "Hadar", "Rigil Kent", "Toliman", "Atria", "Peacock", "Alnair", "Alkar", "Kaus Australis", "Nunki", "Ascella", "Albaldah", "Polis"];
 
-<script type="module">
-    import * as THREE from 'three';
-    import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
-    import { initializeApp } from "firebase/app";
-    import { getDatabase, ref, set, onValue } from "firebase/database";
+    // 300 უნიკალური, მუდმივი კოდი
+    const predefinedCodes = ["104823", "295710", "381947", "472039", "563912", "651048", "742953", "831742", "920381", "114756", "225847", "336938", "447029", "558110", "669201", "770392", "881483", "992574", "103625", "214736", "325847", "436958", "547069", "658170", "769281", "870392", "981403", "102514", "213625", "324736", "435847", "546958", "657069", "768170", "879281", "980392", "101403", "212514", "323625", "434736", "545847", "656958", "767069", "878170", "989281", "109392", "210403", "321514", "432625", "543736", "654847", "765958", "876069", "987170", "198281", "209392", "310403", "421514", "532625", "643736", "754847", "865958", "976069", "187170", "298281", "309392", "410403", "521514", "632625", "743736", "854847", "965958", "176069", "287170", "398281", "409392", "510403", "621514", "732625", "843736", "954847", "165958", "276069", "387170", "498281", "509392", "610403", "721514", "832625", "943736", "154847", "265958", "376069", "487170", "598281", "609392", "710403", "821514", "932625", "143736", "254847", "365958", "476069", "587170", "698281", "709392", "810403", "921514", "132625", "243736", "354847", "465958", "576069", "687170", "798281", "809392", "910403", "121514", "232625", "343736", "454847", "565958", "676069", "787170", "898281", "909392", "110403", "221514", "332625", "443736", "554847", "665958", "776069", "887170", "998281", "100939", "211040", "322151", "433262", "544373", "655484", "766595", "877606", "988717", "199828", "210939", "321040", "432151", "543262", "654373", "765484", "876595", "987606", "198717", "209828", "310939", "421040", "532151", "643262", "754373", "865484", "976595", "187606", "298717", "309828", "410939", "521040", "632151", "743262", "854373", "965484", "176595", "287606", "398717", "409828", "510939", "621040", "732151", "843262", "954373", "165484", "276595", "387606", "498717", "509828", "610939", "721040", "832151", "943262", "154373", "265484", "376595", "487606", "598717", "609828", "710939", "821040", "932151", "143262", "254373", "365484", "476595", "587606", "698717", "709828", "810939", "921040", "132151", "243262", "354373", "465484", "576595", "687606", "798717", "809828", "910939", "121040", "232151", "343262", "454373", "565484", "676595", "787606", "898717", "909828", "110939", "221040", "332151", "443262", "554373", "665484", "776595", "887606", "998717", "100828", "211939", "322040", "433151", "544262", "655373", "766484", "877595", "988606", "199717", "210828", "321939", "432040", "543151", "654262", "765373", "876484", "987595", "198606", "209717", "310828", "421939", "532040", "643151", "754262", "865373", "976484", "187595", "298606", "309717", "410828", "521939", "632040", "743151", "854262", "965373", "176484", "287595", "398606", "409717", "510828", "621939", "732040", "843151", "954262", "165373", "276484", "387595", "498606", "509717", "610828", "721939", "832040", "943151", "154262", "265373", "376484", "487595", "598606", "609717", "710828", "821939", "932040", "143151", "254262", "365373", "476484", "587595", "698606", "709717", "810828", "921939", "132040", "243151", "354262", "465373", "576484", "687595", "798606", "809717", "910828", "121939", "232040", "343151", "454262", "565373", "676484", "787595", "898606", "909717", "110828"];
 
     const firebaseConfig = {
         apiKey: "AIzaSyAYlCwpzE7-D-Jx1sWb1Qq4MKup7akm4g4",
@@ -94,113 +101,180 @@
         projectId: "aster-eros",
         storageBucket: "aster-eros.firebasestorage.app",
         messagingSenderId: "172323770559",
-        appId: "1:172323770559:web:046051111b98acc239b60a",
-        measurementId: "G-RG7Y6QXTQ1"
+        appId: "1:172323770559:web:046051111b98acc239b60a"
     };
 
-    const app = initializeApp(firebaseConfig);
-    const db = getDatabase(app);
-    const starNames = ["Luma", "Aera", "Solin", "Nira", "Vela", "Orin", "Elyx", "Nova", "Sora", "Kora", "Lior", "Aris", "Zela", "Oryn", "Lyra", "Aven", "Hales", "Nexa", "Iora", "Vale", "Selo", "Mirae", "Arix", "Lune", "Virox", "Elen", "Sian", "Oro", "Nexo", "Kiro", "Lysa", "Aelo", "Zeno", "Oria", "Lumo", "Serae", "Vian", "Ilen", "Narae", "Haloa", "Soly", "Avena", "Lioris", "Nexor", "Velae", "Oron", "Zirae", "Elio", "Kalen", "Suna", "Liora", "Arixa", "Novae", "Isera", "Vireo", "Olen", "Syra", "Nolin", "Haloe", "Zorin", "Lumae", "Aerae", "Solis", "Neris", "Velor", "Orionyx", "Elyra", "Noxa", "Sore", "Korae", "Liro", "Arion", "Zelo", "Orel", "Lyron", "Avenor", "Halor", "Nexis", "Iorin", "Valen", "Selor", "Miron", "Arisx", "Lunea", "Virox", "Elor", "Sinae", "Orox", "Nexel"];
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
 
     const scene = new THREE.Scene();
-    // FAR PLANE გაიზარდა 5000-დან 15000-მდე, რომ ვარსკვლავები არ გაქრეს დაშორებისას
-    const camera = new THREE.PerspectiveCamera(60, window.innerWidth/window.innerHeight, 0.1, 15000); 
+    const camera = new THREE.PerspectiveCamera(60, window.innerWidth/window.innerHeight, 0.1, 15000);
     const renderer = new THREE.WebGLRenderer({ antialias: true });
     renderer.setSize(window.innerWidth, window.innerHeight);
-    renderer.setPixelRatio(window.devicePixelRatio);
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
     document.body.appendChild(renderer.domElement);
 
-    const controls = new OrbitControls(camera, renderer.domElement);
-    controls.enableDamping = true; 
+    const controls = new THREE.OrbitControls(camera, renderer.domElement);
+    controls.enableDamping = true;
     controls.autoRotate = true;
     controls.autoRotateSpeed = 0.15;
     camera.position.set(0, 500, 1500);
 
     const starGeo = new THREE.BufferGeometry();
     const starPos = [];
-    for(let i=0; i<15000; i++) starPos.push((Math.random()-0.5)*8000, (Math.random()-0.5)*8000, (Math.random()-0.5)*8000);
+    for(let i=0; i<15000; i++) starPos.push((Math.random()-0.5)*5000, (Math.random()-0.5)*5000, (Math.random()-0.5)*5000);
     starGeo.setAttribute('position', new THREE.Float32BufferAttribute(starPos, 3));
-    const starField = new THREE.Points(starGeo, new THREE.PointsMaterial({color: 0xffffff, size: 1.2}));
+    const starField = new THREE.Points(starGeo, new THREE.PointsMaterial({color: 0xffffff, size: 0.7}));
     scene.add(starField);
 
     const stars = [];
+    let activeS = null;
     let globalRegistry = {};
 
     function createPremiumStar(id) {
-        const rad = 8 + Math.random() * 6;
-        const geo = new THREE.SphereGeometry(rad, 24, 24);
-        const mat = new THREE.MeshStandardMaterial({ color: 0xffcc00, emissive: 0xffcc00, emissiveIntensity: 1.5 });
+        const rad = 7 + Math.random() * 5;
+        const geo = new THREE.SphereGeometry(rad, 32, 32);
+        const canvas = document.createElement('canvas');
+        canvas.width = 128; canvas.height = 128;
+        const ctx = canvas.getContext('2d');
+        const h = Math.random() * 360;
+        const g = ctx.createRadialGradient(64, 64, 0, 64, 64, 64);
+        g.addColorStop(0, `hsl(${h}, 100%, 80%)`);
+        g.addColorStop(1, `hsl(${(h+60)%360}, 100%, 20%)`);
+        ctx.fillStyle = g; ctx.fillRect(0,0,128,128);
+        const tex = new THREE.CanvasTexture(canvas);
+        const mat = new THREE.MeshStandardMaterial({ map: tex, emissiveMap: tex, emissive: 0xffffff, emissiveIntensity: 1.4 });
         const m = new THREE.Mesh(geo, mat);
-        m.position.set((Math.random()-0.5)*3000, (Math.random()-0.5)*3000, (Math.random()-0.5)*3000);
-        m.userData = { id, name: starNames[id-1] || "Star "+id };
+        m.position.set((Math.random()-0.5)*2000, (Math.random()-0.5)*2000, (Math.random()-0.5)*2000);
+        
+        const name = starNames[id - 1] || "Unnamed Star";
+        m.userData = { id: id, name: name };
+        
         scene.add(m);
         stars.push(m);
     }
-    for(let i=1; i<=200; i++) createPremiumStar(i);
+    for(let i=1; i<=300; i++) createPremiumStar(i);
 
-    onValue(ref(db, 'purchased_stars'), (snap) => {
+    db.ref('purchased_stars').on('value', (snap) => {
         globalRegistry = snap.val() || {};
-        stars.forEach(s => s.material.emissiveIntensity = globalRegistry[s.userData.id] ? 0.3 : 1.5);
+        stars.forEach(s => s.material.emissiveIntensity = globalRegistry[s.userData.id] ? 0.2 : 1.4);
         document.getElementById('loader').style.display = 'none';
     });
 
+    function resetView() {
+        if(activeS) activeS.material.emissiveIntensity = globalRegistry[activeS.userData.id] ? 0.2 : 1.4;
+        activeS = null;
+        controls.autoRotate = true;
+        document.getElementById('info-box').innerHTML = `<p style="font-size:10px; color:#666; text-align:center;">აირჩიეთ ვარსკვლავი</p>`;
+        gsap.to(controls.target, { x: 0, y: 0, z: 0, duration: 2 });
+        gsap.to(camera.position, { x: 0, y: 500, z: 1500, duration: 2 });
+    }
+
     function showDetails(star) {
+        if(activeS && activeS !== star) activeS.material.emissiveIntensity = globalRegistry[activeS.userData.id] ? 0.2 : 1.4;
+        activeS = star;
         const id = star.userData.id;
+        const name = star.userData.name;
         const data = globalRegistry[id];
         const box = document.getElementById('info-box');
         controls.autoRotate = false;
-        
+
         if(!data) {
-            box.innerHTML = `<div class="status">ID: #${id} <br> <span class="free">თავისუფალია</span></div><button class="btn btn-buy" id="openPay">ყიდვა</button>`;
-            document.getElementById('openPay').onclick = () => { document.getElementById('modal').style.display='block'; document.getElementById('overlay').style.display='block'; };
+            box.innerHTML = `
+                <span class="info-header">${name} (ID: ${id})</span>
+                <span class="status-text free">თავისუფალია</span>
+                <button class="btn btn-buy" id="openPay">ყიდვა - 30 GEL</button>`;
+            document.getElementById('openPay').onclick = (e) => { 
+                e.stopPropagation(); 
+                document.getElementById('modalTitle').innerText = "შესყიდვა - " + name;
+                document.getElementById('modal').style.display='block'; 
+                document.getElementById('overlay').style.display='block'; 
+            };
         } else {
-            box.innerHTML = `<div class="status">ID: #${id} <br> <span class="sold">გაყიდულია</span></div><input type="password" id="cInput" placeholder="კოდი"><button class="btn btn-buy" id="viewBtn">ნახვა</button><div id="secret-res" style="display:none; color:#ffcc00; margin-top:5px;"></div>`;
-            document.getElementById('viewBtn').onclick = () => {
-                if(document.getElementById('cInput').value === data.code) {
+            box.innerHTML = `
+                <span class="info-header">${name} (ID: ${id})</span>
+                <span class="status-text sold">გაყიდულია</span>
+                <input type="password" id="cInput" placeholder="შეიყვანე 6-ნიშნა კოდი" maxlength="6">
+                <button class="btn btn-buy" id="viewBtn">შეტყობინების ნახვა</button>
+                <div id="secret-res" style="display:none; color:#00ff88; margin-top:10px; font-size:12px; border-top:1px solid #333; padding-top:10px;"></div>`;
+            
+            document.getElementById('viewBtn').onclick = (e) => {
+                e.stopPropagation();
+                const inputCode = document.getElementById('cInput').value;
+                if(inputCode === data.code.toString()) {
                     const res = document.getElementById('secret-res');
-                    res.style.display = 'block'; res.innerText = data.msg;
-                } else alert("არასწორია!");
+                    res.style.display = 'block'; 
+                    res.innerHTML = `<strong>წერილის ავტორი:</strong><br>${data.msg}`;
+                } else {
+                    alert("კოდი არასწორია!");
+                }
             };
         }
 
-        gsap.to(controls.target, { x: star.position.x, y: star.position.y, z: star.position.z, duration: 1.2 });
-        gsap.to(camera.position, { x: star.position.x + 150, y: star.position.y + 50, z: star.position.z + 150, duration: 1.2 });
+        star.material.emissiveIntensity = 2.2;
+        const zoomDist = window.innerWidth < 600 ? 120 : 80;
+        gsap.to(controls.target, { x: star.position.x, y: star.position.y, z: star.position.z, duration: 1.5 });
+        gsap.to(camera.position, { x: star.position.x + zoomDist, y: star.position.y + zoomDist/2, z: star.position.z + zoomDist, duration: 1.5 });
     }
 
-    // მობილურისთვის შეხების დამუშავება
-    const raycaster = new THREE.Raycaster();
-    const mouse = new THREE.Vector2();
-
-    function onSelect(event) {
-        if(event.target.closest('#gui') || event.target.closest('#modal')) return;
-        
-        const x = event.touches ? event.touches[0].clientX : event.clientX;
-        const y = event.touches ? event.touches[0].clientY : event.clientY;
-        
-        mouse.x = (x / window.innerWidth) * 2 - 1;
-        mouse.y = -(y / window.innerHeight) * 2 + 1;
-        
+    let lastTap = 0;
+    window.addEventListener('pointerup', (e) => {
+        if(e.target.closest('#gui') || e.target.closest('#modal') || e.target.closest('#overlay')) return;
+        const currentTime = new Date().getTime();
+        const tapLength = currentTime - lastTap;
+        const mouse = new THREE.Vector2((e.clientX/window.innerWidth)*2-1, -(e.clientY/window.innerHeight)*2+1);
+        const raycaster = new THREE.Raycaster();
         raycaster.setFromCamera(mouse, camera);
-        const hits = raycaster.intersectObjects(stars);
-        if(hits.length > 0) showDetails(hits[0].object);
-    }
-
-    window.addEventListener('touchend', onSelect);
-    window.addEventListener('click', onSelect);
+        const hit = raycaster.intersectObjects(stars);
+        if (hit.length > 0) {
+            showDetails(hit[0].object);
+        } else {
+            if (tapLength < 300 && tapLength > 0) resetView();
+        }
+        lastTap = currentTime;
+    });
 
     document.getElementById('payBtn').onclick = () => {
         const msg = document.getElementById('uMsg').value;
-        const code = document.getElementById('uCode').value;
-        if(msg && code.length === 8) {
-            set(ref(db, 'purchased_stars/' + stars.find(s => s.material.emissiveIntensity > 1).userData.id), { msg, code, timestamp: Date.now() });
-            document.getElementById('modal').style.display='none';
-            document.getElementById('overlay').style.display='none';
-        } else alert("შეავსეთ სწორად!");
+        const card = document.getElementById('cardNumber').value;
+        const exp = document.getElementById('expDate').value;
+        const cvv = document.getElementById('cvv').value;
+
+        if(msg.length >= 2 && card.length === 16 && exp.length === 5 && cvv.length === 3) {
+            const starId = activeS.userData.id;
+            // კოდი იღება მასივიდან ID-ის მიხედვით
+            const secretCode = predefinedCodes[starId - 1]; 
+            
+            db.ref('purchased_stars/' + starId).set({
+                msg: msg,
+                code: secretCode,
+                timestamp: Date.now()
+            }).then(() => {
+                document.getElementById('modal').style.display='none';
+                document.getElementById('overlay').style.display='none';
+                alert("გილოცავთ! ვარსკვლავი " + activeS.userData.name + " თქვენია.\nთქვენი საიდუმლო 6-ნიშნა კოდია: " + secretCode);
+            });
+        } else {
+            alert("გთხოვთ შეავსოთ მონაცემები სწორად!");
+        }
     };
 
-    document.getElementById('backBtn').onclick = () => { document.getElementById('modal').style.display='none'; document.getElementById('overlay').style.display='none'; };
-    document.getElementById('toggle').onclick = () => document.getElementById('gui').classList.toggle('minimized');
+    document.getElementById('backBtn').onclick = () => { 
+        document.getElementById('modal').style.display='none'; 
+        document.getElementById('overlay').style.display='none'; 
+    };
 
+    document.getElementById('searchBtn').onclick = () => { 
+        const query = document.getElementById('searchField').value.trim().toLowerCase();
+        if(!query) return;
+        const s = stars.find(x => 
+            x.userData.id.toString() === query || 
+            x.userData.name.toLowerCase() === query
+        );
+        if(s) showDetails(s); else alert("ვარსკვლავი ვერ მოიძებნა.");
+    };
+
+    document.getElementById('toggle').onclick = () => document.getElementById('gui').classList.toggle('minimized');
     window.addEventListener('resize', () => {
         camera.aspect = window.innerWidth / window.innerHeight;
         camera.updateProjectionMatrix();
@@ -209,11 +283,11 @@
 
     function animate() {
         requestAnimationFrame(animate);
+        starField.rotation.y += 0.0001;
         controls.update();
         renderer.render(scene, camera);
     }
     animate();
 </script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
 </body>
 </html>
