@@ -101,17 +101,7 @@
 <div id="terms-modal">
     <h3 style="color:#ffcc00; margin-top:0;">პირობები</h3>
     <div class="terms-text">
-        ვებსაიტის მეშვეობით მომხმარებელს ეძლევა შესაძლებლობა შეიძინოს ციფრულ სამყაროში არსებული უნიკალური ვარსკვლავი, რომელიც წარმოადგენს არამატერიალურ ციფრულ აქტივს. შეძენის დასრულებისთანავე, საქართველოს მოქმედი კანონმდებლობის შესაბამისად, ვარსკვლავის საკუთრებისა და სარგებლობის უფლება სრულად და ექსკლუზიურად გადადის მომხმარებელზე, რის შემდეგაც აღნიშნული ვარსკვლავი აღარ ექვემდებარება სხვა პირის მიერ შეძენას, გამოყენებას ან ხელახალ გაყიდვას.
-        <br><br>
-        ვარსკვლავის შეძენასთან ერთად მომხმარებელი იღებს ფიზიკურ სამაჯურს, რომელზეც დატანილია უნიკალური იდენტიფიკაციის კოდი. აღნიშნული კოდი უკავშირდება კონკრეტულ ციფრულ ვარსკვლავს და უზრუნველყოფს მომხმარებლის მიერ დატოვებული შეტყობინების წაკითხვის შესაძლებლობას ციფრულ პლატფორმაზე. მომხმარებელი იღებს ვალდებულებას, უზრუნველყოს კოდის უსაფრთხო შენახვა და აცნობიერებს, რომ კოდის დაკარგვის ან მესამე პირისთვის გადაცემის შედეგად წარმოშობილი შედეგები არ ეკისრება საიტის მფლობელს, გარდა კანონით პირდაპირ გათვალისწინებული შემთხვევებისა.
-        <br><br>
-        დაბრუნების პოლიტიკა ფორმდება საქართველოს მომხმარებელთა უფლებების დაცვის შესახებ მოქმედი კანონმდებლობის შესაბამისად და ვრცელდება მხოლოდ იმ შემთხვევებზე, როდესაც შეძენის პროცესში ან მომსახურების მიწოდებისას გამოვლინდა ტექნიკური ხარვეზი, რის გამოც მომხმარებელს ვერ გაეწია ის სერვისი, რომელიც შეძენის დროს იყო დაპირებული. ასეთ შემთხვევაში საიტის მფლობელი იღებს ვალდებულებას გონივრულ ვადაში აღმოფხვრას ტექნიკური პრობლემა ან მომხმარებელს შესთავაზოს ალტერნატიული, თანაბარი ღირებულების გადაწყვეტა.
-        <br><br>
-        თუ ტექნიკური ხარვეზის გამოსწორება ან ალტერნატიული სერვისის მიწოდება შეუძლებელია და მომხმარებელს ფაქტობრივად ვერ მიეწოდა დაპირებული მომსახურება, საიტის მფლობელი უფლებამოსილია მომხმარებელს დაუბრუნოს გადახდილი თანხა სრულად ან ნაწილობრივ, გადახდის იმავე მეთოდით, რომლითაც განხორციელდა შეძენა, საქართველოს კანონმდებლობით განსაზღვრულ გონივრულ ვადაში.
-        <br><br>
-        იმ შემთხვევაში, თუ შეძენის დროს ტექნიკური ხარვეზი არ დაფიქსირდა და მომხმარებელს სრულად გაეწია შეთანხმებული მომსახურება, თანხის დაბრუნება არ ხდება. ვებსაიტის დროებითი გათიშვა, ტექნიკური სამუშაოები, განახლებები ან სხვა დროებითი შეფერხებები არ წარმოადგენს თანხის დაბრუნების საფუძველს, რადგან შეძენილი ვარსკვლავი წარმოადგენს ციფრულ აქტივს და მისი საკუთრების უფლება უკვე გადაცემულია მომხმარებელზე.
-        <br><br>
-        წინამდებარე პირობები არ ზღუდავს მომხმარებლის იმ უფლებებს, რომლებიც მას გააჩნია საქართველოს მოქმედი კანონმდებლობით. ვებსაიტის გამოყენებითა და შეძენის განხორციელებით მომხმარებელი ადასტურებს, რომ გაეცნო წინამდებარე პირობებს, სრულად ესმის ციფრული პროდუქტის სპეციფიკა და ეთანხმება დაბრუნების პოლიტიკას.
+        ვებსაიტის გამოყენების პირობები...
     </div>
     <button class="buy-btn" onclick="closeM()">გასაგებია</button>
 </div>
@@ -139,11 +129,7 @@
     controls.dampingFactor = 0.05;
     controls.enableZoom = true;
     controls.enablePan = true;
-    
-    controls.touches = {
-        ONE: THREE.TOUCH.ROTATE,
-        TWO: THREE.TOUCH.DOLLY_PAN
-    };
+    controls.touches = { ONE: THREE.TOUCH.ROTATE, TWO: THREE.TOUCH.DOLLY_PAN };
 
     camera.position.set(0, 15000, 25000);
 
@@ -165,15 +151,8 @@
         canvas.width = 128; canvas.height = 128;
         const ctx = canvas.getContext('2d');
         const gradient = ctx.createRadialGradient(64, 64, 0, 64, 64, 64);
-        if(isPink) {
-            gradient.addColorStop(0, 'rgba(255, 230, 240, 1)');
-            gradient.addColorStop(0.3, 'rgba(255, 105, 180, 0.8)');
-            gradient.addColorStop(1, 'rgba(0, 0, 0, 0)');
-        } else {
-            gradient.addColorStop(0, 'rgba(255, 255, 255, 1)');
-            gradient.addColorStop(0.4, color);
-            gradient.addColorStop(1, 'rgba(0, 0, 0, 0)');
-        }
+        if(isPink) { gradient.addColorStop(0, 'rgba(255, 230, 240, 1)'); gradient.addColorStop(0.3, 'rgba(255, 105, 180, 0.8)'); gradient.addColorStop(1, 'rgba(0, 0, 0, 0)'); }
+        else { gradient.addColorStop(0, 'rgba(255, 255, 255, 1)'); gradient.addColorStop(0.4, color); gradient.addColorStop(1, 'rgba(0, 0, 0, 0)'); }
         ctx.fillStyle = gradient; ctx.fillRect(0, 0, 128, 128);
         return new THREE.CanvasTexture(canvas);
     }
@@ -203,16 +182,16 @@
         stars.forEach(s => {
             if(data[s.userData.id]) {
                 const info = data[s.userData.id];
-                s.userData.sold = info.sold || false;
-                s.userData.pending = info.pending || false;
+                // ვამუშავებთ სტატუსებს ისე, რომ ტექსტური "true/false"-იც აღიქვას
+                s.userData.sold = String(info.sold) === 'true';
+                s.userData.pending = String(info.pending) === 'true';
                 s.userData.message = info.message || "";
-                s.userData.code = info.code || "";
+                s.userData.code = String(info.code || ""); 
             }
         });
     });
 
-    let activeS = null;
-    let lastClickTime = 0;
+    let activeS = null, lastClickTime = 0;
 
     function select(s) {
         if(activeS) activeS.scale.set(activeS.userData.baseScale, activeS.userData.baseScale, 1);
@@ -224,6 +203,7 @@
         document.getElementById('idTxt').innerText = `ვარსკვლავი #${s.userData.id}`;
         const st = document.getElementById('statusTxt'), btn = document.getElementById('bBtn'), secretArea = document.getElementById('secret-area');
         document.getElementById('secret-msg').innerText = "";
+        
         if(s.userData.sold) {
             st.innerText = "გაყიდულია"; st.className = "st-sold";
             btn.style.display = 'none'; secretArea.style.display = 'block';
@@ -241,14 +221,15 @@
         gsap.to(camera.position, { x: 0, y: 15000, z: 25000, duration: 1.5 });
         gsap.to(controls.target, { x: 0, y: 0, z: 0, duration: 1.5 });
         if(activeS) activeS.scale.set(activeS.userData.baseScale, activeS.userData.baseScale, 1);
-        activeS = null;
-        document.getElementById('info-p').style.display = 'none';
+        activeS = null; document.getElementById('info-p').style.display = 'none';
     }
 
     function checkCode() {
-        if(document.getElementById('unlockCode').value === activeS.userData.code && activeS.userData.code !== "") {
+        const inputVal = document.getElementById('unlockCode').value.trim();
+        // ვადარებთ კოდებს ტიპის მიუხედავად (String გარდაქმნით)
+        if(inputVal !== "" && inputVal === activeS.userData.code) {
             document.getElementById('secret-msg').innerText = activeS.userData.message;
-        } else alert("არასწორი კოდი!");
+        } else { alert("არასწორი კოდი!"); }
     }
 
     function submitOrder() {
@@ -263,26 +244,16 @@
 
     window.addEventListener('pointerup', e => {
         if(e.target.closest('#gui, #modal, #terms-modal')) return;
-        
         const m = new THREE.Vector2((e.clientX/window.innerWidth)*2-1, -(e.clientY/window.innerHeight)*2+1);
         const ray = new THREE.Raycaster();
         ray.setFromCamera(m, camera);
         const hit = ray.intersectObjects(stars);
-        
-        const currentTime = Date.now();
-        const isDoubleClick = (currentTime - lastClickTime < 350);
-        lastClickTime = currentTime;
-
+        const now = Date.now(), isDoubleClick = (now - lastClickTime < 350);
+        lastClickTime = now;
         if(hit.length > 0) {
-            const clickedStar = hit[0].object;
-            
-            if(isDoubleClick && activeS && activeS.userData.id === clickedStar.userData.id) {
-                // თუ სწრაფად დავაკლიკეთ უკვე არჩეულ ვარსკვლავს - დაბრუნება
-                resetView();
-            } else {
-                // თუ ერთი კლიკია ან სხვა ვარსკვლავზეა - არჩევა
-                select(clickedStar);
-            }
+            const clicked = hit[0].object;
+            if(isDoubleClick && activeS && activeS.userData.id === clicked.userData.id) resetView();
+            else select(clicked);
         }
     });
 
@@ -293,18 +264,12 @@
 
     document.getElementById('bBtn').onclick = () => { document.getElementById('modal').style.display='block'; document.getElementById('ovl').style.display='block'; }
     window.openTerms = () => { document.getElementById('terms-modal').style.display='block'; document.getElementById('ovl').style.display='block'; }
-    window.closeM = () => { 
-        document.getElementById('modal').style.display='none'; 
-        document.getElementById('terms-modal').style.display='none'; 
-        document.getElementById('ovl').style.display='none'; 
-    }
+    window.closeM = () => { document.getElementById('modal').style.display='none'; document.getElementById('terms-modal').style.display='none'; document.getElementById('ovl').style.display='none'; }
 
     function animate() {
         requestAnimationFrame(animate);
-        bgGroup.rotation.y += 0.0003;
-        bgGroup.rotation.x += 0.0001;
-        controls.update();
-        renderer.render(scene, camera);
+        bgGroup.rotation.y += 0.0003; bgGroup.rotation.x += 0.0001;
+        controls.update(); renderer.render(scene, camera);
     }
     animate();
 </script>
