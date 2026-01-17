@@ -2,7 +2,7 @@
 <html lang="ka">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ASTER EROS</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
@@ -11,7 +11,7 @@
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
 
     <style>
-        body { margin: 0; overflow: hidden; background: #000; font-family: sans-serif; touch-action: none; }
+        body { margin: 0; overflow: hidden; background: #000; font-family: sans-serif; touch-action: auto; }
         #gui { position: absolute; top: 15px; left: 15px; width: 260px; background: rgba(0, 0, 0, 0.9); border: 1px solid #ffcc00; border-radius: 8px; z-index: 100; color: white; overflow: hidden; transition: 0.3s; }
         #gui.collapsed { height: 40px; }
         .gui-header { padding: 10px 15px; background: #ffcc00; color: #000; font-weight: bold; cursor: pointer; display: flex; justify-content: space-between; }
@@ -25,7 +25,6 @@
         #secret-area { margin-top: 10px; display: none; background: #222; padding: 10px; border-radius: 4px; }
         #secret-msg { color: #ffcc00; font-style: italic; margin-top: 5px; word-wrap: break-word; }
         
-        /* Modal Styles */
         #modal, #terms-modal { display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: #111; border: 1px solid #ffcc00; padding: 20px; z-index: 1000; width: 320px; color: white; max-height: 85vh; overflow-y: auto; border-radius: 8px; }
         .overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 999; }
         
@@ -137,6 +136,7 @@
 
     const controls = new THREE.OrbitControls(camera, renderer.domElement);
     controls.enableDamping = true;
+    controls.enableZoom = true; // zoom-ის ჩართვა
     camera.position.set(0, 15000, 25000);
 
     const bgGroup = new THREE.Group();
