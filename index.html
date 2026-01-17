@@ -138,12 +138,11 @@
     controls.enableDamping = true;
     controls.dampingFactor = 0.05;
     controls.enableZoom = true;
-    controls.enablePan = true; // კადრის გაწევის ჩართვა
+    controls.enablePan = true;
     
-    // მობილურზე 2 თითით მართვის კონფიგურაცია
     controls.touches = {
         ONE: THREE.TOUCH.ROTATE,
-        TWO: THREE.TOUCH.DOLLY_PAN // ორი თითით Zoom და Pan ერთდროულად
+        TWO: THREE.TOUCH.DOLLY_PAN
     };
 
     camera.position.set(0, 15000, 25000);
@@ -212,7 +211,8 @@
         });
     });
 
-    let activeS = null, lastT = 0;
+    let activeS = null;
+    let lastClickTime = 0;
 
     function select(s) {
         if(activeS) activeS.scale.set(activeS.userData.baseScale, activeS.userData.baseScale, 1);
@@ -237,6 +237,14 @@
         }
     }
 
+    function resetView() {
+        gsap.to(camera.position, { x: 0, y: 15000, z: 25000, duration: 1.5 });
+        gsap.to(controls.target, { x: 0, y: 0, z: 0, duration: 1.5 });
+        if(activeS) activeS.scale.set(activeS.userData.baseScale, activeS.userData.baseScale, 1);
+        activeS = null;
+        document.getElementById('info-p').style.display = 'none';
+    }
+
     function checkCode() {
         if(document.getElementById('unlockCode').value === activeS.userData.code && activeS.userData.code !== "") {
             document.getElementById('secret-msg').innerText = activeS.userData.message;
@@ -255,18 +263,26 @@
 
     window.addEventListener('pointerup', e => {
         if(e.target.closest('#gui, #modal, #terms-modal')) return;
+        
         const m = new THREE.Vector2((e.clientX/window.innerWidth)*2-1, -(e.clientY/window.innerHeight)*2+1);
         const ray = new THREE.Raycaster();
         ray.setFromCamera(m, camera);
         const hit = ray.intersectObjects(stars);
-        const now = Date.now(), isDouble = (now - lastT < 300);
-        lastT = now;
-        if(hit.length > 0) select(hit[0].object);
-        else if(isDouble) {
-            gsap.to(camera.position, { x: 0, y: 15000, z: 25000, duration: 1.5 });
-            gsap.to(controls.target, { x: 0, y: 0, z: 0, duration: 1.5 });
-            if(activeS) activeS.scale.set(activeS.userData.baseScale, activeS.userData.baseScale, 1);
-            activeS = null; document.getElementById('info-p').style.display = 'none';
+        
+        const currentTime = Date.now();
+        const isDoubleClick = (currentTime - lastClickTime < 350);
+        lastClickTime = currentTime;
+
+        if(hit.length > 0) {
+            const clickedStar = hit[0].object;
+            
+            if(isDoubleClick && activeS && activeS.userData.id === clickedStar.userData.id) {
+                // თუ სწრაფად დავაკლიკეთ უკვე არჩეულ ვარსკვლავს - დაბრუნება
+                resetView();
+            } else {
+                // თუ ერთი კლიკია ან სხვა ვარსკვლავზეა - არჩევა
+                select(clickedStar);
+            }
         }
     });
 
