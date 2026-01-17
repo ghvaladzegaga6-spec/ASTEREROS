@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>ASTER EROS - Live Galaxy</title>
+    <title>ASTER EROS</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
@@ -11,279 +11,273 @@
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
 
     <style>
-        body { margin: 0; overflow: hidden; background: #000; font-family: 'Segoe UI', sans-serif; touch-action: none; }
-        #gui {
-            position: absolute; top: 15px; left: 15px; width: 220px;
-            background: rgba(0, 0, 0, 0.7); backdrop-filter: blur(15px);
-            border: 0.5px solid rgba(255, 204, 0, 0.5); padding: 12px;
-            border-radius: 10px; z-index: 100; color: white; transition: 0.3s;
-        }
-        @media (max-width: 600px) {
-            #gui { width: 85%; left: 5%; top: 10px; }
-            #modal { width: 90% !important; padding: 15px !important; }
-        }
-        #gui.minimized { width: 50px; height: 20px; overflow: hidden; opacity: 0.5; }
-        h2 { margin: 0 0 10px 0; font-size: 13px; color: #ffcc00; letter-spacing: 2px; text-align: center; }
-        input, textarea {
-            width: 100%; background: rgba(255,255,255,0.1); border: 0.5px solid #444;
-            color: white; padding: 10px; margin-bottom: 8px; border-radius: 4px;
-            box-sizing: border-box; outline: none; font-size: 13px;
-        }
-        .card-extra { display: flex; gap: 8px; }
-        .btn { width: 100%; padding: 12px; border: none; border-radius: 4px; cursor: pointer;
-               font-weight: bold; font-size: 11px; text-transform: uppercase; margin-bottom: 5px; }
-        .btn-buy { background: #ffcc00; color: #000; }
-        .btn-pay { background: #00ff88; color: #000; margin-top: 5px; }
-        .btn-back { background: #444; color: #fff; }
-        .btn-search { background: #222; color: #aaa; border: 0.5px solid #444; }
+        body { margin: 0; overflow: hidden; background: #000; font-family: sans-serif; touch-action: none; }
+        #gui { position: absolute; top: 15px; left: 15px; width: 260px; background: rgba(0, 0, 0, 0.9); border: 1px solid #ffcc00; border-radius: 8px; z-index: 100; color: white; overflow: hidden; transition: 0.3s; }
+        #gui.collapsed { height: 40px; }
+        .gui-header { padding: 10px 15px; background: #ffcc00; color: #000; font-weight: bold; cursor: pointer; display: flex; justify-content: space-between; }
+        .gui-content { padding: 15px; }
+        .info-p { margin-top: 10px; text-align: center; border-top: 1px solid #333; padding-top: 10px; display: none; }
+        .st-free { color: #00ff88; font-size: 11px; font-weight: bold; }
+        .st-sold { color: #ff4444; font-size: 11px; font-weight: bold; }
+        .st-pending { color: #ffa500; font-size: 11px; font-weight: bold; }
+        .buy-btn { width: 100%; padding: 12px; background: #ffcc00; color: #000; border: none; font-weight: bold; cursor: pointer; border-radius: 4px; margin-top: 10px; }
+        .terms-btn { background: transparent; color: #aaa; border: 1px solid #444; padding: 5px; font-size: 10px; width: 100%; margin-top: 10px; cursor: pointer; border-radius: 4px; }
+        #secret-area { margin-top: 10px; display: none; background: #222; padding: 10px; border-radius: 4px; }
+        #secret-msg { color: #ffcc00; font-style: italic; margin-top: 5px; word-wrap: break-word; }
         
-        .info-header { font-size: 16px; color: #ffcc00; font-weight: bold; margin-bottom: 5px; display: block; }
-        .status-text { font-size: 13px; margin-bottom: 10px; display: block; }
-        .free { color: #00ff88; }
-        .sold { color: #ff4d4d; }
+        /* Modal Styles */
+        #modal, #terms-modal { display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: #111; border: 1px solid #ffcc00; padding: 20px; z-index: 1000; width: 320px; color: white; max-height: 85vh; overflow-y: auto; border-radius: 8px; }
+        .overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 999; }
         
-        #modal { display: none; position: fixed; top: 50%; left: 50%;
-                 transform: translate(-50%, -50%); background: #0d0d0d; border: 1px solid #ffcc00; 
-                 padding: 20px; border-radius: 12px; z-index: 1000; width: 280px; color: white;
-                 box-shadow: 0 0 50px rgba(0,0,0,0.8); }
-        .overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
-                   background: rgba(0,0,0,0.85); z-index: 999; }
-        #loader { position: fixed; top:0; left:0; width:100%; height:100%; background:#000; 
-                  display:flex; flex-direction:column; align-items:center;
-                  justify-content:center; z-index:10001; color:#ffcc00; }
+        .form-group { margin-bottom: 12px; }
+        label { display: block; font-size: 11px; color: #aaa; margin-bottom: 4px; }
+        input, textarea { width: 100%; padding: 8px; background: #222; border: 1px solid #444; color: #fff; border-radius: 4px; box-sizing: border-box; }
+        .important-note { color: #ff4444; font-weight: bold; font-size: 12px; margin-bottom: 10px; line-height: 1.4; border: 1px dashed #ff4444; padding: 8px; border-radius: 4px; }
+        .bank-details { background: #222; padding: 10px; border-radius: 4px; font-size: 11px; margin-bottom: 15px; border-left: 3px solid #ffcc00; line-height: 1.6; }
+        .bank-details span { color: #ffcc00; display: block; margin-bottom: 5px; }
+        .terms-text { font-size: 11px; line-height: 1.5; color: #ccc; text-align: justify; }
     </style>
 </head>
 <body>
 
-<div id="loader">
-    <h1 style="letter-spacing:10px;">ASTER EROS</h1>
-    <p style="font-size:10px; letter-spacing:2px;">უკავშირდება გალაქტიკას...</p>
-</div>
-
 <div id="gui">
-    <div style="display:flex; justify-content: space-between; align-items: center;">
-        <h2 id="logo">ASTER EROS</h2>
-        <span id="toggle" style="cursor:pointer; font-size:18px;">[-]</span>
+    <div class="gui-header" onclick="document.getElementById('gui').classList.toggle('collapsed')">
+        <span>ASTER EROS</span>
+        <span id="arr">▼</span>
     </div>
-    <div id="content">
-        <input type="text" id="searchField" placeholder="ID ან სახელი">
-        <button class="btn btn-search" id="searchBtn">ძებნა</button>
-        <div id="info-box"><p style="font-size:10px; color:#666; text-align:center;">აირჩიეთ ვარსკვლავი</p></div>
+    <div class="gui-content">
+        <div style="display:flex; gap:5px; margin-bottom:15px;">
+            <input type="number" id="sId" placeholder="შეიყვანეთ ID">
+            <button onclick="searchStar()" style="cursor:pointer; background:#444; color:#fff; border:none; padding:0 10px; border-radius:4px;">ძებნა</button>
+        </div>
+        <div id="info-p" class="info-p">
+            <div id="statusTxt"></div>
+            <div id="idTxt" style="font-size: 18px; margin: 5px 0;"></div>
+            <div id="secret-area">
+                <input type="text" id="unlockCode" placeholder="6-ციფრიანი კოდი" maxlength="6">
+                <button onclick="checkCode()" style="margin-top:5px; width:100%; background:#444; color:#fff; border:none; padding:5px; cursor:pointer;">ნახვა</button>
+                <div id="secret-msg"></div>
+            </div>
+            <button class="buy-btn" id="bBtn"></button>
+        </div>
+        <button class="terms-btn" onclick="openTerms()">პირობები და დაბრუნების პოლიტიკა</button>
     </div>
 </div>
 
-<div class="overlay" id="overlay"></div>
+<div class="overlay" id="ovl" onclick="closeM()"></div>
+
 <div id="modal">
-    <h3 id="modalTitle" style="color:#ffcc00; font-size:14px; margin-top:0; text-align:center;">შესყიდვა</h3>
-    <textarea id="uMsg" rows="2" placeholder="სამუდამო წერილი..."></textarea>
-    
-    <div style="border-top: 1px solid #333; margin: 10px 0; padding-top: 10px;">
-        <input type="text" id="cardNumber" placeholder="ბარათის ნომერი" maxlength="16">
-        <div class="card-extra">
-            <input type="text" id="expDate" placeholder="MM/YY" maxlength="5">
-            <input type="password" id="cvv" placeholder="CVV" maxlength="3">
-        </div>
-        <button class="btn btn-pay" id="payBtn">გადახდა</button>
-        <button class="btn btn-back" id="backBtn">უკან</button>
+    <div class="important-note">
+        თანხის გადმორიცხვისას, დანიშნულებაში აუცილებლად მიუთითეთ მხოლოდ ვარსკვლავის ID, რომელიც შეიძინეთ
     </div>
+    <div class="bank-details">
+        <span>რეკვიზიტები:</span>
+        BOG-GE15BG0000000602634574 გ.ღ<br>
+        TBC-GE85TB7244845061100111 გ.ღ
+    </div>
+    <div class="form-group">
+        <label>შეტყობინება (ვისაც უძღვნით)</label>
+        <textarea id="uMsg" rows="2" placeholder="დაწერეთ ტექსტი..."></textarea>
+    </div>
+    <div class="form-group">
+        <label>ტელეფონის ნომერი</label>
+        <input type="text" id="uPh" placeholder="5xx xx xx xx">
+    </div>
+    <div class="form-group">
+        <label>ელ-ფოსტა</label>
+        <input type="email" id="uMail">
+    </div>
+    <div class="form-group">
+        <label>მისამართი</label>
+        <input type="text" id="uAddr">
+    </div>
+    <div class="form-group">
+        <label>დოკუმენტის ნომერი (ტრანზაქციის დეტალებიდან)</label>
+        <input type="text" id="uDocNum" placeholder="მაგ: 123456789">
+        <p style="font-size:10px; color:#ffcc00; margin-top:5px;">* თიბისი ბანკის შემთხვევაში მიუთითეთ დოკუმენტის ნომერი.</p>
+    </div>
+    <button class="buy-btn" onclick="submitOrder()">დადასტურება</button>
+</div>
+
+<div id="terms-modal">
+    <h3 style="color:#ffcc00; margin-top:0;">პირობები</h3>
+    <div class="terms-text">
+        ვებსაიტის მეშვეობით მომხმარებელს ეძლევა შესაძლებლობა შეიძინოს ციფრულ სამყაროში არსებული უნიკალური ვარსკვლავი, რომელიც წარმოადგენს არამატერიალურ ციფრულ აქტივს. შეძენის დასრულებისთანავე, საქართველოს მოქმედი კანონმდებლობის შესაბამისად, ვარსკვლავის საკუთრებისა და სარგებლობის უფლება სრულად და ექსკლუზიურად გადადის მომხმარებელზე, რის შემდეგაც აღნიშნული ვარსკვლავი აღარ ექვემდებარება სხვა პირის მიერ შეძენას, გამოყენებას ან ხელახალ გაყიდვას.
+        <br><br>
+        ვარსკვლავის შეძენასთან ერთად მომხმარებელი იღებს ფიზიკურ სამაჯურს, რომელზეც დატანილია უნიკალური იდენტიფიკაციის კოდი. აღნიშნული კოდი უკავშირდება კონკრეტულ ციფრულ ვარსკვლავს და უზრუნველყოფს მომხმარებლის მიერ დატოვებული შეტყობინების წაკითხვის შესაძლებლობას ციფრულ პლატფორმაზე. მომხმარებელი იღებს ვალდებულებას, უზრუნველყოს კოდის უსაფრთხო შენახვა და აცნობიერებს, რომ კოდის დაკარგვის ან მესამე პირისთვის გადაცემის შედეგად წარმოშობილი შედეგები არ ეკისრება საიტის მფლობელს, გარდა კანონით პირდაპირ გათვალისწინებული შემთხვევებისა.
+        <br><br>
+        დაბრუნების პოლიტიკა ფორმდება საქართველოს მომხმარებელთა უფლებების დაცვის შესახებ მოქმედი კანონმდებლობის შესაბამისად და ვრცელდება მხოლოდ იმ შემთხვევებზე, როდესაც შეძენის პროცესში ან მომსახურების მიწოდებისას გამოვლინდა ტექნიკური ხარვეზი, რის გამოც მომხმარებელს ვერ გაეწია ის სერვისი, რომელიც შეძენის დროს იყო დაპირებული. ასეთ შემთხვევაში საიტის მფლობელი იღებს ვალდებულებას გონივრულ ვადაში აღმოფხვრას ტექნიკური პრობლემა ან მომხმარებელს შესთავაზოს ალტერნატიული, თანაბარი ღირებულების გადაწყვეტა.
+        <br><br>
+        თუ ტექნიკური ხარვეზის გამოსწორება ან ალტერნატიული სერვისის მიწოდება შეუძლებელია და მომხმარებელს ფაქტობრივად ვერ მიეწოდა დაპირებული მომსახურება, საიტის მფლობელი უფლებამოსილია მომხმარებელს დაუბრუნოს გადახდილი თანხა სრულად ან ნაწილობრივ, გადახდის იმავე მეთოდით, რომლითაც განხორციელდა შეძენა, საქართველოს კანონმდებლობით განსაზღვრულ გონივრულ ვადაში.
+        <br><br>
+        იმ შემთხვევაში, თუ შეძენის დროს ტექნიკური ხარვეზი არ დაფიქსირდა და მომხმარებელს სრულად გაეწია შეთანხმებული მომსახურება, თანხის დაბრუნება არ ხდება. ვებსაიტის დროებითი გათიშვა, ტექნიკური სამუშაოები, განახლებები ან სხვა დროებითი შეფერხებები არ წარმოადგენს თანხის დაბრუნების საფუძველს, რადგან შეძენილი ვარსკვლავი წარმოადგენს ციფრულ აქტივს და მისი საკუთრების უფლება უკვე გადაცემულია მომხმარებელზე.
+        <br><br>
+        წინამდებარე პირობები არ ზღუდავს მომხმარებლის იმ უფლებებს, რომლებიც მას გააჩნია საქართველოს მოქმედი კანონმდებლობით. ვებსაიტის გამოყენებითა და შეძენის განხორციელებით მომხმარებელი ადასტურებს, რომ გაეცნო წინამდებარე პირობებს, სრულად ესმის ციფრული პროდუქტის სპეციფიკა და ეთანხმება დაბრუნების პოლიტიკას.
+    </div>
+    <button class="buy-btn" onclick="closeM()">გასაგებია</button>
 </div>
 
 <script>
-    const starNames = ["Sirius", "Canopus", "Arcturus", "Alpha Centauri", "Vega", "Capella", "Rigel", "Procyon", "Achernar", "Betelgeuse", "Hadar", "Altair", "Acrux", "Aldebaran", "Spica", "Antares", "Pollux", "Fomalhaut", "Deneb", "Mimosa", "Regulus", "Adhara", "Castor", "Gacrux", "Shaula", "Bellatrix", "Elnath", "Miaplacidus", "Alnilam", "Alnair", "Alnitak", "Alioth", "Dubhe", "Mirfak", "Wezen", "Sargas", "Kaus Australis", "Avior", "Alkaid", "Menkalinan", "Atria", "Alhena", "Peacock", "Alsephina", "Mirzam", "Alphard", "Hamal", "Polaris", "Algieba", "Diphda", "Nunki", "Menkent", "Mirach", "Alpheratz", "Saiph", "Kocab", "Alcas", "Algol", "Tiaki", "Almach", "Eltanin", "Sadr", "Naos", "Kadir", "Enif", "Gienah", "Aludra", "Ankaa", "Gemma", "Suhail", "Denebola", "Albaldah", "Markab", "Menkar", "Alnitah", "Zubeneschamali", "Kraz", "Scheat", "Alphecca", "Alderamin", "Sabik", "Alsuhail", "Epsilon", "Etamin", "Menkarlina", "Zavijava", "Alshain", "Musalha", "Deneb Kaitos", "Talitha", "Zaurak", "Kuma", "Rasalgethi", "Zosma", "Tarf", "Almach", "Adhafera", "Shedar", "Caph", "Ruchbah", "Tsih", "Schedir", "Seguin", "Izar", "Nekkar", "Seginus", "Nunki", "Ascella", "Kaus Borealis", "Kaus Media", "Arkab", "Alnasl", "Alya", "Arietis", "Sheratan", "Mesarthim", "Hamal", "Botein", "Zaurak", "Aldhanab", "Azha", "Acamar", "Beid", "Keid", "Angetenar", "Theemin", "Sceptrum", "Kursi", "Zibal", "Alkalurops", "Zibal", "Sceptrum", "Mothallah", "Metallah", "Sadalmelik", "Sadalsuud", "Sadachbia", "Skat", "Ancha", "Situla", "Homam", "Matar", "Baham", "Enif", "Biham", "Deneb Algedi", "Dabih", "Nashira", "Alshat", "Okul", "Deneb", "Sadr", "Gienah", "Azelfafage", "Ruchba", "Eltanin", "Rastaban", "Alrakis", "Kuma", "Grumium", "Nodus", "Tyl", "Aldhibah", "Edasich", "Gianfar", "Thuban", "Kochab", "Pherkad", "Yildun", "Polaris", "Kaffaljidhma", "Menkar", "Baten Kaitos", "Deneb Kaitos", "Mira", "Zaurak", "Sheratan", "Mesarthim", "Hamal", "Alcyone", "Electra", "Maia", "Merope", "Taygeta", "Celaeno", "Asterope", "Pleione", "Atlas", "Hyades", "Ain", "Aldebaran", "Elnath", "Alheka", "Meissa", "Betelgeuse", "Bellatrix", "Mintaka", "Alnilam", "Alnitak", "Saiph", "Rigel", "Sirius", "Murzim", "Muliphein", "Wezen", "Adhara", "Aludra", "Furud", "Procyon", "Gomeisa", "Castor", "Pollux", "Alhena", "Tejat", "Mebsuta", "Propus", "Wasat", "Alzirr", "Alphard", "Regulus", "Denebola", "Zosma", "Chertan", "Adhafera", "Algieba", "Alterf", "Rasalas", "Spica", "Heze", "Zavijava", "Zaniah", "Syrma", "Rijl", "Antares", "Graffias", "Dschubba", "Sargas", "Shaula", "Lesath", "Jabhat", "Girtab", "Alniyat", "Vega", "Sheliak", "Sulafat", "Altair", "Tarazed", "Alshain", "Deneb", "Sadr", "Gienah", "Albireo", "Fomalhaut", "Markab", "Scheat", "Algenib", "Enif", "Homam", "Matar", "Baham", "Sadalmelik", "Sadalsuud", "Sadachbia", "Skat", "Achernar", "Ankaa", "Acamar", "Phact", "Wazn", "Canopus", "Miaplacidus", "Avior", "Aspidiske", "Suhail", "Alsephina", "Tureis", "Naos", "Hadar", "Rigil Kent", "Toliman", "Atria", "Peacock", "Alnair", "Alkar", "Kaus Australis", "Nunki", "Ascella", "Albaldah", "Polis"];
-
-    // 300 უნიკალური, მუდმივი კოდი
-    const predefinedCodes = ["104823", "295710", "381947", "472039", "563912", "651048", "742953", "831742", "920381", "114756", "225847", "336938", "447029", "558110", "669201", "770392", "881483", "992574", "103625", "214736", "325847", "436958", "547069", "658170", "769281", "870392", "981403", "102514", "213625", "324736", "435847", "546958", "657069", "768170", "879281", "980392", "101403", "212514", "323625", "434736", "545847", "656958", "767069", "878170", "989281", "109392", "210403", "321514", "432625", "543736", "654847", "765958", "876069", "987170", "198281", "209392", "310403", "421514", "532625", "643736", "754847", "865958", "976069", "187170", "298281", "309392", "410403", "521514", "632625", "743736", "854847", "965958", "176069", "287170", "398281", "409392", "510403", "621514", "732625", "843736", "954847", "165958", "276069", "387170", "498281", "509392", "610403", "721514", "832625", "943736", "154847", "265958", "376069", "487170", "598281", "609392", "710403", "821514", "932625", "143736", "254847", "365958", "476069", "587170", "698281", "709392", "810403", "921514", "132625", "243736", "354847", "465958", "576069", "687170", "798281", "809392", "910403", "121514", "232625", "343736", "454847", "565958", "676069", "787170", "898281", "909392", "110403", "221514", "332625", "443736", "554847", "665958", "776069", "887170", "998281", "100939", "211040", "322151", "433262", "544373", "655484", "766595", "877606", "988717", "199828", "210939", "321040", "432151", "543262", "654373", "765484", "876595", "987606", "198717", "209828", "310939", "421040", "532151", "643262", "754373", "865484", "976595", "187606", "298717", "309828", "410939", "521040", "632151", "743262", "854373", "965484", "176595", "287606", "398717", "409828", "510939", "621040", "732151", "843262", "954373", "165484", "276595", "387606", "498717", "509828", "610939", "721040", "832151", "943262", "154373", "265484", "376595", "487606", "598717", "609828", "710939", "821040", "932151", "143262", "254373", "365484", "476595", "587606", "698717", "709828", "810939", "921040", "132151", "243262", "354373", "465484", "576595", "687606", "798717", "809828", "910939", "121040", "232151", "343262", "454373", "565484", "676595", "787606", "898717", "909828", "110939", "221040", "332151", "443262", "554373", "665484", "776595", "887606", "998717", "100828", "211939", "322040", "433151", "544262", "655373", "766484", "877595", "988606", "199717", "210828", "321939", "432040", "543151", "654262", "765373", "876484", "987595", "198606", "209717", "310828", "421939", "532040", "643151", "754262", "865373", "976484", "187595", "298606", "309717", "410828", "521939", "632040", "743151", "854262", "965373", "176484", "287595", "398606", "409717", "510828", "621939", "732040", "843151", "954262", "165373", "276484", "387595", "498606", "509717", "610828", "721939", "832040", "943151", "154262", "265373", "376484", "487595", "598606", "609717", "710828", "821939", "932040", "143151", "254262", "365373", "476484", "587595", "698606", "709717", "810828", "921939", "132040", "243151", "354262", "465373", "576484", "687595", "798606", "809717", "910828", "121939", "232040", "343151", "454262", "565373", "676484", "787595", "898606", "909717", "110828"];
-
     const firebaseConfig = {
         apiKey: "AIzaSyAYlCwpzE7-D-Jx1sWb1Qq4MKup7akm4g4",
         authDomain: "aster-eros.firebaseapp.com",
         databaseURL: "https://aster-eros-default-rtdb.europe-west1.firebasedatabase.app",
         projectId: "aster-eros",
-        storageBucket: "aster-eros.firebasestorage.app",
-        messagingSenderId: "172323770559",
+        storageBucket: "aster-eros.appspot.com",
         appId: "1:172323770559:web:046051111b98acc239b60a"
     };
-
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
 
     const scene = new THREE.Scene();
-    const camera = new THREE.PerspectiveCamera(60, window.innerWidth/window.innerHeight, 0.1, 15000);
+    const camera = new THREE.PerspectiveCamera(60, window.innerWidth/window.innerHeight, 10, 100000);
     const renderer = new THREE.WebGLRenderer({ antialias: true });
     renderer.setSize(window.innerWidth, window.innerHeight);
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
     document.body.appendChild(renderer.domElement);
 
     const controls = new THREE.OrbitControls(camera, renderer.domElement);
     controls.enableDamping = true;
-    controls.autoRotate = true;
-    controls.autoRotateSpeed = 0.15;
-    camera.position.set(0, 500, 1500);
+    camera.position.set(0, 15000, 25000);
 
-    const starGeo = new THREE.BufferGeometry();
-    const starPos = [];
-    for(let i=0; i<15000; i++) starPos.push((Math.random()-0.5)*5000, (Math.random()-0.5)*5000, (Math.random()-0.5)*5000);
-    starGeo.setAttribute('position', new THREE.Float32BufferAttribute(starPos, 3));
-    const starField = new THREE.Points(starGeo, new THREE.PointsMaterial({color: 0xffffff, size: 0.7}));
-    scene.add(starField);
+    const bgGroup = new THREE.Group();
+    const bgGeo = new THREE.BufferGeometry();
+    const bgPos = [];
+    for(let i=0; i<25000; i++) bgPos.push((Math.random()-0.5)*80000, (Math.random()-0.5)*80000, (Math.random()-0.5)*80000);
+    bgGeo.setAttribute('position', new THREE.Float32BufferAttribute(bgPos, 3));
+    const bgPoints = new THREE.Points(bgGeo, new THREE.PointsMaterial({color: 0xffffff, size: 4}));
+    bgGroup.add(bgPoints);
+    scene.add(bgGroup);
 
+    const starGroup = new THREE.Group();
+    scene.add(starGroup);
     const stars = [];
-    let activeS = null;
-    let globalRegistry = {};
 
-    function createPremiumStar(id) {
-        const rad = 7 + Math.random() * 5;
-        const geo = new THREE.SphereGeometry(rad, 32, 32);
+    function createGlowTexture(color, isPink = false) {
         const canvas = document.createElement('canvas');
         canvas.width = 128; canvas.height = 128;
         const ctx = canvas.getContext('2d');
-        const h = Math.random() * 360;
-        const g = ctx.createRadialGradient(64, 64, 0, 64, 64, 64);
-        g.addColorStop(0, `hsl(${h}, 100%, 80%)`);
-        g.addColorStop(1, `hsl(${(h+60)%360}, 100%, 20%)`);
-        ctx.fillStyle = g; ctx.fillRect(0,0,128,128);
-        const tex = new THREE.CanvasTexture(canvas);
-        const mat = new THREE.MeshStandardMaterial({ map: tex, emissiveMap: tex, emissive: 0xffffff, emissiveIntensity: 1.4 });
-        const m = new THREE.Mesh(geo, mat);
-        m.position.set((Math.random()-0.5)*2000, (Math.random()-0.5)*2000, (Math.random()-0.5)*2000);
-        
-        const name = starNames[id - 1] || "Unnamed Star";
-        m.userData = { id: id, name: name };
-        
-        scene.add(m);
-        stars.push(m);
+        const gradient = ctx.createRadialGradient(64, 64, 0, 64, 64, 64);
+        if(isPink) {
+            gradient.addColorStop(0, 'rgba(255, 230, 240, 1)');
+            gradient.addColorStop(0.3, 'rgba(255, 105, 180, 0.8)');
+            gradient.addColorStop(1, 'rgba(0, 0, 0, 0)');
+        } else {
+            gradient.addColorStop(0, 'rgba(255, 255, 255, 1)');
+            gradient.addColorStop(0.4, color);
+            gradient.addColorStop(1, 'rgba(0, 0, 0, 0)');
+        }
+        ctx.fillStyle = gradient; ctx.fillRect(0, 0, 128, 128);
+        return new THREE.CanvasTexture(canvas);
     }
-    for(let i=1; i<=300; i++) createPremiumStar(i);
 
-    db.ref('purchased_stars').on('value', (snap) => {
-        globalRegistry = snap.val() || {};
-        stars.forEach(s => s.material.emissiveIntensity = globalRegistry[s.userData.id] ? 0.2 : 1.4);
-        document.getElementById('loader').style.display = 'none';
+    function createStar(id, x, y, z, size, color, isPink = false) {
+        const mat = new THREE.SpriteMaterial({ map: createGlowTexture(color, isPink), transparent: true, blending: THREE.AdditiveBlending });
+        const sprite = new THREE.Sprite(mat);
+        sprite.position.set(x, y, z);
+        let fSize = (id === 1) ? 2400 : (isPink ? 1440 : size * 6);
+        sprite.scale.set(fSize, fSize, 1);
+        sprite.userData = { id, baseScale: fSize, sold: false, pending: false, price: (id === 1 ? 149 : 79), message: "", code: "" };
+        starGroup.add(sprite);
+        stars.push(sprite);
+    }
+
+    createStar(1, 0, 0, 500, 400, '#ffcc00');
+    const starColors = ['#ffcc00', '#00d2ff', '#bd00ff', '#ff4e50', '#8a2be2'];
+    for(let i=2; i<=350; i++) {
+        const angle = 0.15 * (i-1);
+        const radius = 4000 + ((i-1)*50);
+        createStar(i, radius * Math.cos(angle), (Math.random()-0.5)*4000, radius * Math.sin(angle), 50 + Math.random()*40, starColors[i % 5]);
+    }
+    createStar(351, 15000, 8000, -15000, 120, '#ff1493', true);
+
+    db.ref('stars_data').on('value', snap => {
+        const data = snap.val() || {};
+        stars.forEach(s => {
+            if(data[s.userData.id]) {
+                const info = data[s.userData.id];
+                s.userData.sold = info.sold || false;
+                s.userData.pending = info.pending || false;
+                s.userData.message = info.message || "";
+                s.userData.code = info.code || "";
+            }
+        });
     });
 
-    function resetView() {
-        if(activeS) activeS.material.emissiveIntensity = globalRegistry[activeS.userData.id] ? 0.2 : 1.4;
-        activeS = null;
-        controls.autoRotate = true;
-        document.getElementById('info-box').innerHTML = `<p style="font-size:10px; color:#666; text-align:center;">აირჩიეთ ვარსკვლავი</p>`;
-        gsap.to(controls.target, { x: 0, y: 0, z: 0, duration: 2 });
-        gsap.to(camera.position, { x: 0, y: 500, z: 1500, duration: 2 });
+    let activeS = null, lastT = 0;
+
+    function select(s) {
+        if(activeS) activeS.scale.set(activeS.userData.baseScale, activeS.userData.baseScale, 1);
+        activeS = s;
+        s.scale.set(s.userData.baseScale * 2, s.userData.baseScale * 2, 1);
+        gsap.to(controls.target, { x: s.position.x, y: s.position.y, z: s.position.z, duration: 1 });
+        gsap.to(camera.position, { x: s.position.x + 2000, y: s.position.y + 1000, z: s.position.z + 2000, duration: 1 });
+        document.getElementById('info-p').style.display = 'block';
+        document.getElementById('idTxt').innerText = `ვარსკვლავი #${s.userData.id}`;
+        const st = document.getElementById('statusTxt'), btn = document.getElementById('bBtn'), secretArea = document.getElementById('secret-area');
+        document.getElementById('secret-msg').innerText = "";
+        if(s.userData.sold) {
+            st.innerText = "გაყიდულია"; st.className = "st-sold";
+            btn.style.display = 'none'; secretArea.style.display = 'block';
+        } else if(s.userData.pending) {
+            st.innerText = "დამუშავების პროცესშია..."; st.className = "st-pending";
+            btn.style.display = 'none'; secretArea.style.display = 'none';
+        } else {
+            st.innerText = "თავისუფალია"; st.className = "st-free";
+            btn.style.display = 'block'; btn.innerText = `ყიდვა - ${s.userData.price} GEL`;
+            secretArea.style.display = 'none';
+        }
     }
 
-    function showDetails(star) {
-        if(activeS && activeS !== star) activeS.material.emissiveIntensity = globalRegistry[activeS.userData.id] ? 0.2 : 1.4;
-        activeS = star;
-        const id = star.userData.id;
-        const name = star.userData.name;
-        const data = globalRegistry[id];
-        const box = document.getElementById('info-box');
-        controls.autoRotate = false;
-
-        if(!data) {
-            box.innerHTML = `
-                <span class="info-header">${name} (ID: ${id})</span>
-                <span class="status-text free">თავისუფალია</span>
-                <button class="btn btn-buy" id="openPay">ყიდვა - 30 GEL</button>`;
-            document.getElementById('openPay').onclick = (e) => { 
-                e.stopPropagation(); 
-                document.getElementById('modalTitle').innerText = "შესყიდვა - " + name;
-                document.getElementById('modal').style.display='block'; 
-                document.getElementById('overlay').style.display='block'; 
-            };
-        } else {
-            box.innerHTML = `
-                <span class="info-header">${name} (ID: ${id})</span>
-                <span class="status-text sold">გაყიდულია</span>
-                <input type="password" id="cInput" placeholder="შეიყვანე 6-ნიშნა კოდი" maxlength="6">
-                <button class="btn btn-buy" id="viewBtn">შეტყობინების ნახვა</button>
-                <div id="secret-res" style="display:none; color:#00ff88; margin-top:10px; font-size:12px; border-top:1px solid #333; padding-top:10px;"></div>`;
-            
-            document.getElementById('viewBtn').onclick = (e) => {
-                e.stopPropagation();
-                const inputCode = document.getElementById('cInput').value;
-                if(inputCode === data.code.toString()) {
-                    const res = document.getElementById('secret-res');
-                    res.style.display = 'block'; 
-                    res.innerHTML = `<strong>წერილის ავტორი:</strong><br>${data.msg}`;
-                } else {
-                    alert("კოდი არასწორია!");
-                }
-            };
-        }
-
-        star.material.emissiveIntensity = 2.2;
-        const zoomDist = window.innerWidth < 600 ? 120 : 80;
-        gsap.to(controls.target, { x: star.position.x, y: star.position.y, z: star.position.z, duration: 1.5 });
-        gsap.to(camera.position, { x: star.position.x + zoomDist, y: star.position.y + zoomDist/2, z: star.position.z + zoomDist, duration: 1.5 });
+    function checkCode() {
+        if(document.getElementById('unlockCode').value === activeS.userData.code && activeS.userData.code !== "") {
+            document.getElementById('secret-msg').innerText = activeS.userData.message;
+        } else alert("არასწორი კოდი!");
     }
 
-    let lastTap = 0;
-    window.addEventListener('pointerup', (e) => {
-        if(e.target.closest('#gui') || e.target.closest('#modal') || e.target.closest('#overlay')) return;
-        const currentTime = new Date().getTime();
-        const tapLength = currentTime - lastTap;
-        const mouse = new THREE.Vector2((e.clientX/window.innerWidth)*2-1, -(e.clientY/window.innerHeight)*2+1);
-        const raycaster = new THREE.Raycaster();
-        raycaster.setFromCamera(mouse, camera);
-        const hit = raycaster.intersectObjects(stars);
-        if (hit.length > 0) {
-            showDetails(hit[0].object);
-        } else {
-            if (tapLength < 300 && tapLength > 0) resetView();
+    function submitOrder() {
+        const ph = document.getElementById('uPh').value, doc = document.getElementById('uDocNum').value;
+        if(!ph || !doc) return alert("შეავსეთ ტელეფონის ნომერი და დოკუმენტის ნომერი!");
+        db.ref('stars_data/' + activeS.userData.id).set({
+            pending: true, sold: false, message: document.getElementById('uMsg').value,
+            customerPhone: ph, customerMail: document.getElementById('uMail').value,
+            address: document.getElementById('uAddr').value, docNumber: doc, timestamp: Date.now()
+        }).then(() => { alert("მოთხოვნა გაიგზავნა!"); closeM(); });
+    }
+
+    window.addEventListener('pointerup', e => {
+        if(e.target.closest('#gui, #modal, #terms-modal')) return;
+        const m = new THREE.Vector2((e.clientX/window.innerWidth)*2-1, -(e.clientY/window.innerHeight)*2+1);
+        const ray = new THREE.Raycaster();
+        ray.setFromCamera(m, camera);
+        const hit = ray.intersectObjects(stars);
+        const now = Date.now(), isDouble = (now - lastT < 300);
+        lastT = now;
+        if(hit.length > 0) select(hit[0].object);
+        else if(isDouble) {
+            gsap.to(camera.position, { x: 0, y: 15000, z: 25000, duration: 1.5 });
+            gsap.to(controls.target, { x: 0, y: 0, z: 0, duration: 1.5 });
+            if(activeS) activeS.scale.set(activeS.userData.baseScale, activeS.userData.baseScale, 1);
+            activeS = null; document.getElementById('info-p').style.display = 'none';
         }
-        lastTap = currentTime;
     });
 
-    document.getElementById('payBtn').onclick = () => {
-        const msg = document.getElementById('uMsg').value;
-        const card = document.getElementById('cardNumber').value;
-        const exp = document.getElementById('expDate').value;
-        const cvv = document.getElementById('cvv').value;
+    window.searchStar = () => {
+        const s = stars.find(x => x.userData.id == document.getElementById('sId').value);
+        if(s) select(s);
+    }
 
-        if(msg.length >= 2 && card.length === 16 && exp.length === 5 && cvv.length === 3) {
-            const starId = activeS.userData.id;
-            // კოდი იღება მასივიდან ID-ის მიხედვით
-            const secretCode = predefinedCodes[starId - 1]; 
-            
-            db.ref('purchased_stars/' + starId).set({
-                msg: msg,
-                code: secretCode,
-                timestamp: Date.now()
-            }).then(() => {
-                document.getElementById('modal').style.display='none';
-                document.getElementById('overlay').style.display='none';
-                alert("გილოცავთ! ვარსკვლავი " + activeS.userData.name + " თქვენია.\nთქვენი საიდუმლო 6-ნიშნა კოდია: " + secretCode);
-            });
-        } else {
-            alert("გთხოვთ შეავსოთ მონაცემები სწორად!");
-        }
-    };
-
-    document.getElementById('backBtn').onclick = () => { 
+    document.getElementById('bBtn').onclick = () => { document.getElementById('modal').style.display='block'; document.getElementById('ovl').style.display='block'; }
+    window.openTerms = () => { document.getElementById('terms-modal').style.display='block'; document.getElementById('ovl').style.display='block'; }
+    window.closeM = () => { 
         document.getElementById('modal').style.display='none'; 
-        document.getElementById('overlay').style.display='none'; 
-    };
-
-    document.getElementById('searchBtn').onclick = () => { 
-        const query = document.getElementById('searchField').value.trim().toLowerCase();
-        if(!query) return;
-        const s = stars.find(x => 
-            x.userData.id.toString() === query || 
-            x.userData.name.toLowerCase() === query
-        );
-        if(s) showDetails(s); else alert("ვარსკვლავი ვერ მოიძებნა.");
-    };
-
-    document.getElementById('toggle').onclick = () => document.getElementById('gui').classList.toggle('minimized');
-    window.addEventListener('resize', () => {
-        camera.aspect = window.innerWidth / window.innerHeight;
-        camera.updateProjectionMatrix();
-        renderer.setSize(window.innerWidth, window.innerHeight);
-    });
+        document.getElementById('terms-modal').style.display='none'; 
+        document.getElementById('ovl').style.display='none'; 
+    }
 
     function animate() {
         requestAnimationFrame(animate);
-        starField.rotation.y += 0.0001;
+        bgGroup.rotation.y += 0.0003;
+        bgGroup.rotation.x += 0.0001;
         controls.update();
         renderer.render(scene, camera);
     }
