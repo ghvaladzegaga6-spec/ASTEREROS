@@ -11,7 +11,7 @@
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
 
     <style>
-        body { margin: 0; overflow: hidden; background: #000; font-family: sans-serif; touch-action: auto; }
+        body { margin: 0; overflow: hidden; background: #000; font-family: sans-serif; touch-action: none; }
         #gui { position: absolute; top: 15px; left: 15px; width: 260px; background: rgba(0, 0, 0, 0.9); border: 1px solid #ffcc00; border-radius: 8px; z-index: 100; color: white; overflow: hidden; transition: 0.3s; }
         #gui.collapsed { height: 40px; }
         .gui-header { padding: 10px 15px; background: #ffcc00; color: #000; font-weight: bold; cursor: pointer; display: flex; justify-content: space-between; }
@@ -136,7 +136,16 @@
 
     const controls = new THREE.OrbitControls(camera, renderer.domElement);
     controls.enableDamping = true;
-    controls.enableZoom = true; // zoom-ის ჩართვა
+    controls.dampingFactor = 0.05;
+    controls.enableZoom = true;
+    controls.enablePan = true; // კადრის გაწევის ჩართვა
+    
+    // მობილურზე 2 თითით მართვის კონფიგურაცია
+    controls.touches = {
+        ONE: THREE.TOUCH.ROTATE,
+        TWO: THREE.TOUCH.DOLLY_PAN // ორი თითით Zoom და Pan ერთდროულად
+    };
+
     camera.position.set(0, 15000, 25000);
 
     const bgGroup = new THREE.Group();
