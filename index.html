@@ -17,7 +17,6 @@
         .gui-header { padding: 10px 15px; background: #ffcc00; color: #000; font-weight: bold; cursor: pointer; display: flex; justify-content: space-between; }
         .gui-content { padding: 15px; }
         
-        /* ფილტრის სტილი */
         .filter-container { display: flex; gap: 5px; margin-bottom: 10px; }
         .filter-btn { flex: 1; padding: 8px; background: #222; color: #fff; border: 1px solid #444; border-radius: 4px; cursor: pointer; font-size: 11px; transition: 0.2s; }
         .filter-btn.active { background: #ffcc00; color: #000; border-color: #ffcc00; }
@@ -158,10 +157,6 @@
     const controls = new THREE.OrbitControls(camera, renderer.domElement);
     controls.enableDamping = true;
     controls.dampingFactor = 0.05;
-    controls.enableZoom = true;
-    controls.enablePan = true;
-    controls.touches = { ONE: THREE.TOUCH.ROTATE, TWO: THREE.TOUCH.DOLLY_PAN };
-
     camera.position.set(0, 15000, 25000);
 
     const bgGroup = new THREE.Group();
@@ -195,7 +190,7 @@
         sprite.position.set(x, y, z);
         let fSize = (id === 1) ? 2400 : (isPink ? 1440 : size * 6);
         sprite.scale.set(fSize, fSize, 1);
-        sprite.userData = { id, baseScale: fSize, sold: false, pending: false, price: (id === 1 ? 149 : 79), message: "", code: "", starName: "" };
+        sprite.userData = { id, baseScale: fSize, sold: false, pending: false, price: (id === 1 ? 149 : 79), starName: "" };
         starGroup.add(sprite);
         stars.push(sprite);
     }
@@ -214,17 +209,15 @@
         stars.forEach(s => {
             if(data[s.userData.id]) {
                 const info = data[s.userData.id];
-                s.userData.sold = String(info.sold) === 'true';
-                s.userData.pending = String(info.pending) === 'true';
-                s.userData.message = info.message || "";
-                s.userData.code = String(info.code || ""); 
-                s.userData.starName = info.starName || "";
+                s.userData.sold = info.sold === true;
+                s.userData.pending = info.pending === true;
+                // სახელი გამოჩნდება მხოლოდ მაშინ, თუ ვარსკვლავი ოფიციალურად გაყიდულია (sold: true)
+                s.userData.starName = s.userData.sold ? (info.starName || "") : "";
             }
         });
-        applyFilter(); // მონაცემების განახლებისას ფილტრის ხელახლა გადატარება
+        applyFilter();
     });
 
-    // ფილტრის ფუნქციონალი
     window.setFilter = (type) => {
         currentFilter = type;
         document.getElementById('filterAll').classList.toggle('active', type === 'all');
@@ -234,30 +227,24 @@
 
     function applyFilter() {
         stars.forEach(s => {
-            if (currentFilter === 'free') {
-                // თუ ფილტრია "თავისუფალი", ვმალავთ მათ ვინც გაყიდულია ან დამუშავებაშია
-                s.visible = !(s.userData.sold || s.userData.pending);
-            } else {
-                s.visible = true;
-            }
+            if (currentFilter === 'free') s.visible = !(s.userData.sold || s.userData.pending);
+            else s.visible = true;
         });
     }
 
     let activeS = null, lastClickTime = 0;
 
     function select(s) {
-        if(!s.visible) return; // თუ ვარსკვლავი დამალულია ფილტრით, ვერ ავირჩევთ
+        if(!s.visible) return;
         if(activeS) activeS.scale.set(activeS.userData.baseScale, activeS.userData.baseScale, 1);
         activeS = s;
         s.scale.set(s.userData.baseScale * 2, s.userData.baseScale * 2, 1);
         gsap.to(controls.target, { x: s.position.x, y: s.position.y, z: s.position.z, duration: 1 });
         gsap.to(camera.position, { x: s.position.x + 2000, y: s.position.y + 1000, z: s.position.z + 2000, duration: 1 });
-        document.getElementById('info-p').style.display = 'block';
         
+        document.getElementById('info-p').style.display = 'block';
         let displayText = `ვარსკვლავი #${s.userData.id}`;
-        if(s.userData.sold && s.userData.starName) {
-            displayText += ` - "${s.userData.starName}"`;
-        }
+        if(s.userData.sold && s.userData.starName) displayText += ` - "${s.userData.starName}"`;
         document.getElementById('idTxt').innerText = displayText;
         
         const st = document.getElementById('statusTxt'), btn = document.getElementById('bBtn'), secretArea = document.getElementById('secret-area');
@@ -276,39 +263,56 @@
         }
     }
 
+    function checkCode() {
+        const inputVal = document.getElementById('unlockCode').value.trim();
+        if(!inputVal) return alert("შეიყვანეთ კოდი!");
+        
+        // მიმართავს მხოლოდ დაცულ განყოფილებას კონკრეტული კოდით
+        db.ref('protected_messages/' + activeS.userData.id).once('value').then(snap => {
+            const data = snap.val();
+            if(data && data.code === inputVal) {
+                document.getElementById('secret-msg').innerText = data.message;
+            } else {
+                alert("არასწორი კოდი!");
+            }
+        });
+    }
+
+    function submitOrder() {
+        const ph = document.getElementById('uPh').value, doc = document.getElementById('uDocNum').value;
+        const sName = document.getElementById('starName').value, pId = document.getElementById('uPersonalId').value;
+        if(!ph || !doc || !sName || !pId) return alert("შეავსეთ ყველა სავალდებულო ველი!");
+
+        const starId = activeS.userData.id;
+        const orderData = {
+            starId: starId,
+            starName: sName,
+            personalId: pId,
+            message: document.getElementById('uMsg').value,
+            customerPhone: ph,
+            customerMail: document.getElementById('uMail').value,
+            address: document.getElementById('uAddr').value,
+            docNumber: doc,
+            timestamp: firebase.database.ServerValue.TIMESTAMP
+        };
+
+        // მონაცემების გაყოფა: სტატუსი ყველასთვის, შეკვეთა მხოლოდ ადმინისთვის
+        const updates = {};
+        updates['/stars_data/' + starId + '/pending'] = true;
+        updates['/stars_data/' + starId + '/starName'] = sName; // ინახება, მაგრამ არ ჩანს სანამ sold=false
+        updates['/private_orders/' + starId] = orderData;
+
+        db.ref().update(updates).then(() => {
+            alert("მოთხოვნა გაიგზავნა წარმატებით!");
+            closeM();
+        }).catch(err => alert("შეცდომა: მონაცემები ვერ გაიგზავნა."));
+    }
+
     function resetView() {
         gsap.to(camera.position, { x: 0, y: 15000, z: 25000, duration: 1.5 });
         gsap.to(controls.target, { x: 0, y: 0, z: 0, duration: 1.5 });
         if(activeS) activeS.scale.set(activeS.userData.baseScale, activeS.userData.baseScale, 1);
         activeS = null; document.getElementById('info-p').style.display = 'none';
-    }
-
-    function checkCode() {
-        const inputVal = document.getElementById('unlockCode').value.trim();
-        if(inputVal !== "" && inputVal === activeS.userData.code) {
-            document.getElementById('secret-msg').innerText = activeS.userData.message;
-        } else { alert("არასწორი კოდი!"); }
-    }
-
-    function submitOrder() {
-        const ph = document.getElementById('uPh').value, doc = document.getElementById('uDocNum').value;
-        const sName = document.getElementById('starName').value;
-        const pId = document.getElementById('uPersonalId').value;
-
-        if(!ph || !doc || !sName || !pId) return alert("შეავსეთ ყველა სავალდებულო ველი!");
-
-        db.ref('stars_data/' + activeS.userData.id).set({
-            pending: true, 
-            sold: false, 
-            starName: sName,
-            personalId: pId,
-            message: document.getElementById('uMsg').value,
-            customerPhone: ph, 
-            customerMail: document.getElementById('uMail').value,
-            address: document.getElementById('uAddr').value, 
-            docNumber: doc, 
-            timestamp: Date.now()
-        }).then(() => { alert("მოთხოვნა გაიგზავნა!"); closeM(); });
     }
 
     window.addEventListener('pointerup', e => {
@@ -328,13 +332,7 @@
 
     window.searchStar = () => {
         const s = stars.find(x => x.userData.id == document.getElementById('sId').value);
-        if(s) {
-            if (currentFilter === 'free' && (s.userData.sold || s.userData.pending)) {
-                alert("ეს ვარსკვლავი გაყიდულია. სანახავად გადართეთ ფილტრი 'ყველა'-ზე.");
-            } else {
-                select(s);
-            }
-        }
+        if(s) select(s);
     }
 
     document.getElementById('bBtn').onclick = () => { document.getElementById('modal').style.display='block'; document.getElementById('ovl').style.display='block'; }
