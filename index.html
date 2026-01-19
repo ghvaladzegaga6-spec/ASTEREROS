@@ -16,6 +16,12 @@
         #gui.collapsed { height: 40px; }
         .gui-header { padding: 10px 15px; background: #ffcc00; color: #000; font-weight: bold; cursor: pointer; display: flex; justify-content: space-between; }
         .gui-content { padding: 15px; }
+        
+        /* ფილტრის სტილი */
+        .filter-container { display: flex; gap: 5px; margin-bottom: 10px; }
+        .filter-btn { flex: 1; padding: 8px; background: #222; color: #fff; border: 1px solid #444; border-radius: 4px; cursor: pointer; font-size: 11px; transition: 0.2s; }
+        .filter-btn.active { background: #ffcc00; color: #000; border-color: #ffcc00; }
+
         .info-p { margin-top: 10px; text-align: center; border-top: 1px solid #333; padding-top: 10px; display: none; }
         .st-free { color: #00ff88; font-size: 11px; font-weight: bold; }
         .st-sold { color: #ff4444; font-size: 11px; font-weight: bold; }
@@ -35,6 +41,7 @@
         .bank-details { background: #222; padding: 10px; border-radius: 4px; font-size: 11px; margin-bottom: 15px; border-left: 3px solid #ffcc00; line-height: 1.6; }
         .bank-details span { color: #ffcc00; display: block; margin-bottom: 5px; }
         .terms-text { font-size: 11px; line-height: 1.5; color: #ccc; text-align: justify; }
+        .delivery-note { font-size: 9px; color: #ffcc00; margin-top: 2px; display: block; }
     </style>
 </head>
 <body>
@@ -45,6 +52,11 @@
         <span id="arr">▼</span>
     </div>
     <div class="gui-content">
+        <div class="filter-container">
+            <button class="filter-btn active" id="filterAll" onclick="setFilter('all')">ყველა</button>
+            <button class="filter-btn" id="filterFree" onclick="setFilter('free')">თავისუფალი</button>
+        </div>
+
         <div style="display:flex; gap:5px; margin-bottom:15px;">
             <input type="number" id="sId" placeholder="შეიყვანეთ ID">
             <button onclick="searchStar()" style="cursor:pointer; background:#444; color:#fff; border:none; padding:0 10px; border-radius:4px;">ძებნა</button>
@@ -75,8 +87,16 @@
         TBC-GE85TB7244845061100111 გ.ღ
     </div>
     <div class="form-group">
+        <label>ვარსკვლავის სახელი (რომელიც გსურთ დაარქვათ)</label>
+        <input type="text" id="starName" placeholder="მაგ: მარიამი">
+    </div>
+    <div class="form-group">
         <label>შეტყობინება (ვისაც უძღვნით)</label>
         <textarea id="uMsg" rows="2" placeholder="დაწერეთ ტექსტი..."></textarea>
+    </div>
+    <div class="form-group">
+        <label>პირადი ნომერი</label>
+        <input type="text" id="uPersonalId" placeholder="11 ციფრიანი ნომერი">
     </div>
     <div class="form-group">
         <label>ტელეფონის ნომერი</label>
@@ -89,6 +109,7 @@
     <div class="form-group">
         <label>მისამართი</label>
         <input type="text" id="uAddr">
+        <span class="delivery-note">ნივთის მიწოდების საფასურის გადახდა ხდება კურიერთან.</span>
     </div>
     <div class="form-group">
         <label>დოკუმენტის ნომერი (ტრანზაქციის დეტალებიდან)</label>
@@ -101,17 +122,17 @@
 <div id="terms-modal">
     <h3 style="color:#ffcc00; margin-top:0;">პირობები</h3>
     <div class="terms-text">
-        ვებსაიტის მეშვეობით მომხმარებელს ეძლევა შესაძლებლობა შეიძინოს ციფრულ სამყაროში არსებული უნიკალური ვარსკვლავი, რომელიც წარმოადგენს არამატერიალურ ციფრულ აქტივს. შეძენის დასრულებისთანავე, საქართველოს მოქმედი კანონმდებლობის შესაბამისად, ვარსკვლავის საკუთრებისა და სარგებლობის უფლება სრულად და ექსკლუზიურად გადადის მომხმარებელზე, რის შემდეგაც აღნიშნული ვარსკვლავი აღარ ექვემდებარება სხვა პირის მიერ შეძენას, გამოყენებას ან ხელახალ გაყიდვას.
+        ვებსაიტის მეშვეობით მომხმარებელს ეძლევა შესაძლებლობა შეიძინოს ციფრულ სამყაროში არსებული უნიკალური ვარსკვლავი, რომელიც წარმოადგენს ციფრულ აქტივს. შეძენის დასრულებისთანავე, ვარსკვლავზე საკუთრებისა და სარგებლობის უფლება სრულად გადადის მომხმარებელზე. ვინაიდან ეს არის ექსკლუზიური პროდუქტი, გაყიდვის შემდეგ მისი ხელახლა შეძენა ან სხვა პირზე გადაცემა ჩვენი პლატფორმის მეშვეობით აღარ ხდება. 
         <br><br>
-        ვარსკვლავის შეძენასთან ერთად მომხმარებელი იღებს ფიზიკურ სამაჯურს, რომელზეც დატანილია უნიკალური იდენტიფიკაციის კოდი. აღნიშნული კოდი უკავშირდება კონკრეტულ ციფრულ ვარსკვლავს და უზრუნველყოფს მომხმარებლის მიერ დატოვებული შეტყობინების წაკითხვის შესაძლებლობას ციფრულ პლატფორმაზე. მომხმარებელი იღებს ვალდებულებას, უზრუნველყოს კოდის უსაფრთხო შენახვა და აცნობიერებს, რომ კოდის დაკარგვის ან მესამე პირისთვის გადაცემის შედეგად წარმოშობილი შედეგები არ ეკისრება საიტის მფლობელს, გარდა კანონით პირდაპირ გათვალისწინებული შემთხვევებისა.
+        ვარსკვლავის შეძენასთან ერთად მომხმარებელი იღებს ფიზიკურ სამაჯურს, რომელზეც დატანილია ინდივიდუალური იდენტიფიკაციის კოდი. ეს კოდი თქვენი გასაღებია — ის უკავშირდება კონკრეტულ ციფრულ ვარსკვლავს და იძლევა საშუალებას, გახსნათ და წაიკითხოთ შეძენის პერიოდში დატოვებული შეტყობინება. გთხოვთ, კოდი შეინახოთ უსაფრთხოდ, რადგან მისი დაკარგვის ან სხვა პირისთვის გადაცემის შემთხვევისას, საიტის ადმინისტრაცია პასუხისმგებლობას ვერ აიღებს თქვენს პირად შეტყობინებებზე ან წვდომაზე. 
         <br><br>
-        დაბრუნების პოლიტიკა ფორმდება საქართველოს მომხმარებელთა უფლებების დაცვის შესახებ მოქმედი კანონმდებლობის შესაბამისად და ვრცელდება მხოლოდ იმ შემთხვევებზე, როდესაც შეძენის პროცესში ან მომსახურების მიწოდებისას გამოვლინდა ტექნიკური ხარვეზი, რის გამოც მომხმარებელს ვერ გაეწია ის სერვისი, რომელიც შეძენის დროს იყო დაპირებული. ასეთ შემთხვევაში საიტის მფლობელი იღებს ვალდებულებას გონივრულ ვადაში აღმოფხვრას ტექნიკური პრობლემა ან მომხმარებელს შესთავაზოს ალტერნატიული, თანაბარი ღირებულების გადაწყვეტა.
+        დაბრუნების პოლიტიკა ეყრდნობა მომხმარებელთა უფლებების დაცვის მოქმედ კანონმდებლობას. თუმცა, პროდუქტის სპეციფიკიდან გამომდინარე — რადგან თქვენ მომენტალურად იღებთ წვდომას ციფრულ კონტენტზე და გეგზავნებათ თქვენთვის ინდივიდუალურად მომზადებული სამაჯური — შეძენის განხორციელებით თქვენ ადასტურებთ, რომ უარს ამბობთ ნივთის ყოველგვარი მიზეზის გარეშე დაბრუნების უფლებაზე. 
         <br><br>
-        თუ ტექნიკური ხარვეზის გამოსწორება ან ალტერნატიული სერვისის მიწოდება შეუძლებელია და მომხმარებელს ფაქტობრივად ვერ მიეწოდა დაპირებული მომსახურება, საიტის მფლობელი უფლებამოსილია მომხმარებელს დაუბრუნოს გადახდილი თანხა სრულად ან ნაწილობრივ, გადახდის იმავე მეთოდით, რომლითაც განხორციელდა შეძენა, საქართველოს კანონმდებლობით განსაზღვრულ გონივრულ ვადაში.
+        თანხის დაბრუნება შესაძლებელია მხოლოდ იმ შემთხვევაში, თუ შეძენისას დაფიქსირდა ტექნიკური ხარვეზი და თქვენ ფაქტობრივად ვერ მიიღეთ ის მომსახურება, რომელსაც პლატფორმა გპირდებოდათ. ასეთ დროს ჩვენ ვიღებთ ვალდებულებას, უმოკლეს ვადაში გამოვასწოროთ პრობლემა, ხოლო თუ ეს შეუძლებელი აღმოჩნდება, სრულად დაგიბრუნებთ გადახდილ თანხას იმავე მეთოდით, რომლითაც ისარგებლეთ ყიდვისას. 
         <br><br>
-        იმ შემთხვევაში, თუ შეძენის დროს ტექნიკური ხარვეზი არ დაფიქსირდა და მომხმარებელს სრულად გაეწია შეთანხმებული მომსახურება, თანხის დაბრუნება არ ხდება. ვებსაიტის დროებითი გათიშვა, ტექნიკური სამუშაოები, განახლებები ან სხვა დროებითი შეფერხებები არ წარმოადგენს თანხის დაბრუნების საფუძველს, რადგან შეძენილი ვარსკვლავი წარმოადგენს ციფრულ აქტივს და მისი საკუთრების უფლება უკვე გადაცემულია მომხმარებელზე.
+        თუ შეძენა წარმატებით დასრულდა და თქვენ მიიღეთ წვდომა ციფრულ აქტივზე, თანხის უკან დაბრუნება აღარ მოხდება. მომხმარებელი აცნობიერებს და ეთანხმება იმას, რომ ციფრული პლატფორმის ბუნებიდან გამომდინარე, საიტის მფლობელი პასუხს არ აგებს მომავალში პლატფორმის ფუნქციონირების შესაძლო შეწყვეტაზე. საიტის მუშაობის ნებისმიერი მიზეზით შეწყვეტა, გაუქმება ან მიუწვდომლობა არ წარმოადგენს გადახდილი თანხის დაბრუნების საფუძველს, რადგან შეძენილი ციფრული აქტივის გადაცემა მომხმარებლისთვის უკვე დასრულებულ ფაქტად ითვლება. 
         <br><br>
-        წინამდებარე პირობები არ ზღუდავს მომხმარებლის იმ უფლებებს, რომლებიც მას გააჩნია საქართველოს მოქმედი კანონმდებლობით. ვებსაიტის გამოყენებითა და შეძენის განხორციელებით მომხმარებელი ადასტურებს, რომ გაეცნო წინამდებარე პირობებს, სრულად ესმის ციფრული პროდუქტის სპეციფიკა და ეთანხმება დაბრუნების პოლიტიკას.
+        ვებსაიტის გამოყენებითა და ყიდვის განხორციელებით თქვენ ადასტურებთ, რომ გაეცანით ამ პირობებს, ეთანხმებით მათ და სრულად გაცნობიერებული გაქვთ პროდუქტის თავისებურება.
     </div>
     <button class="buy-btn" onclick="closeM()">გასაგებია</button>
 </div>
@@ -155,6 +176,7 @@
     const starGroup = new THREE.Group();
     scene.add(starGroup);
     const stars = [];
+    let currentFilter = 'all';
 
     function createGlowTexture(color, isPink = false) {
         const canvas = document.createElement('canvas');
@@ -173,7 +195,7 @@
         sprite.position.set(x, y, z);
         let fSize = (id === 1) ? 2400 : (isPink ? 1440 : size * 6);
         sprite.scale.set(fSize, fSize, 1);
-        sprite.userData = { id, baseScale: fSize, sold: false, pending: false, price: (id === 1 ? 149 : 79), message: "", code: "" };
+        sprite.userData = { id, baseScale: fSize, sold: false, pending: false, price: (id === 1 ? 149 : 79), message: "", code: "", starName: "" };
         starGroup.add(sprite);
         stars.push(sprite);
     }
@@ -196,20 +218,48 @@
                 s.userData.pending = String(info.pending) === 'true';
                 s.userData.message = info.message || "";
                 s.userData.code = String(info.code || ""); 
+                s.userData.starName = info.starName || "";
             }
         });
+        applyFilter(); // მონაცემების განახლებისას ფილტრის ხელახლა გადატარება
     });
+
+    // ფილტრის ფუნქციონალი
+    window.setFilter = (type) => {
+        currentFilter = type;
+        document.getElementById('filterAll').classList.toggle('active', type === 'all');
+        document.getElementById('filterFree').classList.toggle('active', type === 'free');
+        applyFilter();
+    };
+
+    function applyFilter() {
+        stars.forEach(s => {
+            if (currentFilter === 'free') {
+                // თუ ფილტრია "თავისუფალი", ვმალავთ მათ ვინც გაყიდულია ან დამუშავებაშია
+                s.visible = !(s.userData.sold || s.userData.pending);
+            } else {
+                s.visible = true;
+            }
+        });
+    }
 
     let activeS = null, lastClickTime = 0;
 
     function select(s) {
+        if(!s.visible) return; // თუ ვარსკვლავი დამალულია ფილტრით, ვერ ავირჩევთ
         if(activeS) activeS.scale.set(activeS.userData.baseScale, activeS.userData.baseScale, 1);
         activeS = s;
         s.scale.set(s.userData.baseScale * 2, s.userData.baseScale * 2, 1);
         gsap.to(controls.target, { x: s.position.x, y: s.position.y, z: s.position.z, duration: 1 });
         gsap.to(camera.position, { x: s.position.x + 2000, y: s.position.y + 1000, z: s.position.z + 2000, duration: 1 });
         document.getElementById('info-p').style.display = 'block';
-        document.getElementById('idTxt').innerText = `ვარსკვლავი #${s.userData.id}`;
+        
+        let displayText = `ვარსკვლავი #${s.userData.id}`;
+        if(s.userData.sold && s.userData.starName) {
+            displayText += ` - "${s.userData.starName}"`;
+        }
+        document.getElementById('idTxt').innerText = displayText;
+        
         const st = document.getElementById('statusTxt'), btn = document.getElementById('bBtn'), secretArea = document.getElementById('secret-area');
         document.getElementById('secret-msg').innerText = "";
         
@@ -242,11 +292,22 @@
 
     function submitOrder() {
         const ph = document.getElementById('uPh').value, doc = document.getElementById('uDocNum').value;
-        if(!ph || !doc) return alert("შეავსეთ ტელეფონის ნომერი და დოკუმენტის ნომერი!");
+        const sName = document.getElementById('starName').value;
+        const pId = document.getElementById('uPersonalId').value;
+
+        if(!ph || !doc || !sName || !pId) return alert("შეავსეთ ყველა სავალდებულო ველი!");
+
         db.ref('stars_data/' + activeS.userData.id).set({
-            pending: true, sold: false, message: document.getElementById('uMsg').value,
-            customerPhone: ph, customerMail: document.getElementById('uMail').value,
-            address: document.getElementById('uAddr').value, docNumber: doc, timestamp: Date.now()
+            pending: true, 
+            sold: false, 
+            starName: sName,
+            personalId: pId,
+            message: document.getElementById('uMsg').value,
+            customerPhone: ph, 
+            customerMail: document.getElementById('uMail').value,
+            address: document.getElementById('uAddr').value, 
+            docNumber: doc, 
+            timestamp: Date.now()
         }).then(() => { alert("მოთხოვნა გაიგზავნა!"); closeM(); });
     }
 
@@ -255,7 +316,7 @@
         const m = new THREE.Vector2((e.clientX/window.innerWidth)*2-1, -(e.clientY/window.innerHeight)*2+1);
         const ray = new THREE.Raycaster();
         ray.setFromCamera(m, camera);
-        const hit = ray.intersectObjects(stars);
+        const hit = ray.intersectObjects(stars.filter(s => s.visible));
         const now = Date.now(), isDoubleClick = (now - lastClickTime < 350);
         lastClickTime = now;
         if(hit.length > 0) {
@@ -267,7 +328,13 @@
 
     window.searchStar = () => {
         const s = stars.find(x => x.userData.id == document.getElementById('sId').value);
-        if(s) select(s);
+        if(s) {
+            if (currentFilter === 'free' && (s.userData.sold || s.userData.pending)) {
+                alert("ეს ვარსკვლავი გაყიდულია. სანახავად გადართეთ ფილტრი 'ყველა'-ზე.");
+            } else {
+                select(s);
+            }
+        }
     }
 
     document.getElementById('bBtn').onclick = () => { document.getElementById('modal').style.display='block'; document.getElementById('ovl').style.display='block'; }
