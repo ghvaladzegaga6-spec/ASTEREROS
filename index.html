@@ -209,9 +209,9 @@
         stars.forEach(s => {
             if(data[s.userData.id]) {
                 const info = data[s.userData.id];
-                s.userData.sold = info.sold === true;
-                s.userData.pending = info.pending === true;
-                // სახელი გამოჩნდება მხოლოდ მაშინ, თუ ვარსკვლავი ოფიციალურად გაყიდულია (sold: true)
+                s.userData.sold = info.sold === true || info.sold === "true";
+                s.userData.pending = info.pending === true || info.pending === "true";
+                // სახელი გამოჩნდება მხოლოდ მაშინ, თუ ვარსკვლავი ოფიციალურად გაყიდულია
                 s.userData.starName = s.userData.sold ? (info.starName || "") : "";
             }
         });
@@ -267,10 +267,10 @@
         const inputVal = document.getElementById('unlockCode').value.trim();
         if(!inputVal) return alert("შეიყვანეთ კოდი!");
         
-        // მიმართავს მხოლოდ დაცულ განყოფილებას კონკრეტული კოდით
-        db.ref('protected_messages/' + activeS.userData.id).once('value').then(snap => {
+        // პირდაპირ ვამოწმებთ იმავე ადგილას, სადაც ვარსკვლავია
+        db.ref('stars_data/' + activeS.userData.id).once('value').then(snap => {
             const data = snap.val();
-            if(data && data.code === inputVal) {
+            if(data && String(data.code) === String(inputVal)) {
                 document.getElementById('secret-msg').innerText = data.message;
             } else {
                 alert("არასწორი კოდი!");
@@ -283,9 +283,9 @@
         const sName = document.getElementById('starName').value, pId = document.getElementById('uPersonalId').value;
         if(!ph || !doc || !sName || !pId) return alert("შეავსეთ ყველა სავალდებულო ველი!");
 
-        const starId = activeS.userData.id;
-        const orderData = {
-            starId: starId,
+        db.ref('stars_data/' + activeS.userData.id).set({
+            pending: true,
+            sold: false,
             starName: sName,
             personalId: pId,
             message: document.getElementById('uMsg').value,
@@ -293,17 +293,9 @@
             customerMail: document.getElementById('uMail').value,
             address: document.getElementById('uAddr').value,
             docNumber: doc,
-            timestamp: firebase.database.ServerValue.TIMESTAMP
-        };
-
-        // მონაცემების გაყოფა: სტატუსი ყველასთვის, შეკვეთა მხოლოდ ადმინისთვის
-        const updates = {};
-        updates['/stars_data/' + starId + '/pending'] = true;
-        updates['/stars_data/' + starId + '/starName'] = sName; // ინახება, მაგრამ არ ჩანს სანამ sold=false
-        updates['/private_orders/' + starId] = orderData;
-
-        db.ref().update(updates).then(() => {
-            alert("მოთხოვნა გაიგზავნა წარმატებით!");
+            timestamp: Date.now()
+        }).then(() => {
+            alert("მოთხოვნა გაიგზავნა!");
             closeM();
         }).catch(err => alert("შეცდომა: მონაცემები ვერ გაიგზავნა."));
     }
