@@ -3,15 +3,15 @@
 <head>
     <link rel="icon" type="image/png" href="favicon.png">
     <meta property="og:type" content="website">
-<meta property="og:url" content="https://astereros.ge/">
-<meta property="og:title" content="ASTER EROS - აჩუქე ვარსკვლავი">
-<meta property="og:description" content="გახდი უნიკალური ვარსკვლავის მფლობელი და დატოვე შენი შეტყობინება სამუდამოდ.">
-<meta property="og:image" content="https://astereros.ge/logo.png">
+    <meta property="og:url" content="https://astereros.ge/">
+    <meta property="og:title" content="ASTER EROS - აჩუქე ვარსკვლავი">
+    <meta property="og:description" content="გახდი უნიკალური ვარსკვლავის მფლობელი და დატოვე შენი შეტყობინება სამუდამოდ.">
+    <meta property="og:image" content="https://astereros.ge/logo.png">
 
-<meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:image" content="https://astereros.ge/logo.png">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:image" content="https://astereros.ge/logo.png">
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>ASTER EROS</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
@@ -21,7 +21,7 @@
 
     <style>
         body { margin: 0; overflow: hidden; background: #000; font-family: sans-serif; touch-action: none; }
-        #gui { position: absolute; top: 15px; left: 15px; width: 260px; background: rgba(0, 0, 0, 0.9); border: 1px solid #ffcc00; border-radius: 8px; z-index: 100; color: white; overflow: hidden; transition: 0.3s; }
+        #gui { position: absolute; top: 15px; left: 15px; width: 260px; background: rgba(0, 0, 0, 0.9); border: 1px solid #ffcc00; border-radius: 8px; z-index: 100; color: white; overflow: hidden; transition: 0.3s; touch-action: manipulation; }
         #gui.collapsed { height: 40px; }
         .gui-header { padding: 10px 15px; background: #ffcc00; color: #000; font-weight: bold; cursor: pointer; display: flex; justify-content: space-between; }
         .gui-content { padding: 15px; }
@@ -39,17 +39,17 @@
         #secret-area { margin-top: 10px; display: none; background: #222; padding: 10px; border-radius: 4px; }
         #secret-msg { color: #ffcc00; font-style: italic; margin-top: 5px; word-wrap: break-word; }
         
-        #modal, #terms-modal { display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: #111; border: 1px solid #ffcc00; padding: 20px; z-index: 1000; width: 320px; color: white; max-height: 85vh; overflow-y: auto; border-radius: 8px; }
+        #modal, #terms-modal { display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: #111; border: 1px solid #ffcc00; padding: 20px; z-index: 1000; width: 320px; color: white; max-height: 85vh; overflow-y: auto; border-radius: 8px; box-sizing: border-box; }
         .overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 999; }
         
         .form-group { margin-bottom: 12px; }
         label { display: block; font-size: 11px; color: #aaa; margin-bottom: 4px; }
-        input, textarea { width: 100%; padding: 8px; background: #222; border: 1px solid #444; color: #fff; border-radius: 4px; box-sizing: border-box; }
+        input, textarea { width: 100%; padding: 8px; background: #222; border: 1px solid #444; color: #fff; border-radius: 4px; box-sizing: border-box; font-size: 16px; }
         .important-note { color: #ff4444; font-weight: bold; font-size: 12px; margin-bottom: 10px; line-height: 1.4; border: 1px dashed #ff4444; padding: 8px; border-radius: 4px; }
         .bank-details { background: #222; padding: 10px; border-radius: 4px; font-size: 11px; margin-bottom: 15px; border-left: 3px solid #ffcc00; line-height: 1.6; }
         .bank-details span { color: #ffcc00; display: block; margin-bottom: 5px; }
-        .terms-text { font-size: 11px; line-height: 1.5; color: #ccc; text-align: justify; }
-        .delivery-note { font-size: 9px; color: #ffcc00; margin-top: 2px; display: block; }
+        .terms-text { font-size: 11px; line-height: 1.5; color: #ccc; text-align: justify; white-space: pre-line; }
+        .delivery-note { font-size: 9px; color: #ffcc00; margin-top: 4px; display: block; }
     </style>
 </head>
 <body>
@@ -67,7 +67,7 @@
 
         <div style="display:flex; gap:5px; margin-bottom:15px;">
             <input type="number" id="sId" placeholder="შეიყვანეთ ID">
-            <button onclick="searchStar()" style="cursor:pointer; background:#444; color:#fff; border:none; padding:0 10px; border-radius:4px;">ძებნა</button>
+            <button onclick="searchStar()" style="cursor:pointer; background:#444; color:#fff; border:none; padding:0 10px; border-radius:4px; touch-action: manipulation;">ძებნა</button>
         </div>
         <div id="info-p" class="info-p">
             <div id="statusTxt"></div>
@@ -117,7 +117,7 @@
     <div class="form-group">
         <label>მისამართი</label>
         <input type="text" id="uAddr">
-        <span class="delivery-note">ნივთის მიწოდების საფასურის გადახდა ხდება კურიერთან.</span>
+        <span class="delivery-note">მიწოდების საფასურის გადახდა ხდება კურიერთან</span>
     </div>
     <div class="form-group">
         <label>დოკუმენტის ნომერი (ტრანზაქციის დეტალებიდან)</label>
@@ -129,19 +129,17 @@
 
 <div id="terms-modal">
     <h3 style="color:#ffcc00; margin-top:0;">პირობები</h3>
-    <div class="terms-text">
-        ვებსაიტის მეშვეობით მომხმარებელს ეძლევა შესაძლებლობა შეიძინოს ციფრულ სამყაროში არსებული უნიკალური ვარსკვლავი, რომელიც წარმოადგენს ციფრულ აქტივს. შეძენის დასრულებისთანავე, ვარსკვლავზე საკუთრებისა და სარგებლობის უფლება სრულად გადადის მომხმარებელზე. ვინაიდან ეს არის ექსკლუზიური პროდუქტი, გაყიდვის შემდეგ მისი ხელახლა შეძენა ან სხვა პირზე გადაცემა ჩვენი პლატფორმის მეშვეობით აღარ ხდება. 
-        <br><br>
-        ვარსკვლავის შეძენასთან ერთად მომხმარებელი იღებს ფიზიკურ სამაჯურს, რომელზეც დატანილია ინდივიდუალური იდენტიფიკაციის კოდი. ეს კოდი თქვენი გასაღებია — ის უკავშირდება კონკრეტულ ციფრულ ვარსკვლავს და იძლევა საშუალებას, გახსნათ და წაიკითხოთ შეძენის პერიოდში დატოვებული შეტყობინება. გთხოვთ, კოდი შეინახოთ უსაფრთხოდ, რადგან მისი დაკარგვის ან სხვა პირისთვის გადაცემის შემთხვევისას, საიტის ადმინისტრაცია პასუხისმგებლობას ვერ აიღებს თქვენს პირად შეტყობინებებზე ან წვდომაზე. 
-        <br><br>
-        დაბრუნების პოლიტიკა ეყრდნობა მომხმარებელთა უფლებების დაცვის მოქმედ კანონმდებლობას. თუმცა, პროდუქტის სპეციფიკიდან გამომდინარე — რადგან თქვენ მომენტალურად იღებთ წვდომას ციფრულ კონტენტზე და გეგზავნებათ თქვენთვის ინდივიდუალურად მომზადებული სამაჯური — შეძენის განხორციელებით თქვენ ადასტურებთ, რომ უარს ამბობთ ნივთის ყოველგვარი მიზეზის გარეშე დაბრუნების უფლებაზე. 
-        <br><br>
-        თანხის დაბრუნება შესაძლებელია მხოლოდ იმ შემთხვევაში, თუ შეძენისას დაფიქსირდა ტექნიკური ხარვეზი და თქვენ ფაქტობრივად ვერ მიიღეთ ის მომსახურება, რომელსაც პლატფორმა გპირდებოდათ. ასეთ დროს ჩვენ ვიღებთ ვალდებულებას, უმოკლეს ვადაში გამოვასწოროთ პრობლემა, ხოლო თუ ეს შეუძლებელი აღმოჩნდება, სრულად დაგიბრუნებთ გადახდილ თანხას იმავე მეთოდით, რომლითაც ისარგებლეთ ყიდვისას. 
-        <br><br>
-        თუ შეძენა წარმატებით დასრულდა და თქვენ მიიღეთ წვდომა ციფრულ აქტივზე, თანხის უკან დაბრუნება აღარ მოხდება. მომხმარებელი აცნობიერებს და ეთანხმება იმას, რომ ციფრული პლატფორმის ბუნებიდან გამომდინარე, საიტის მფლობელი პასუხს არ აგებს მომავალში პლატფორმის ფუნქციონირების შესაძლო შეწყვეტაზე. საიტის მუშაობის ნებისმიერი მიზეზით შეწყვეტა, გაუქმება ან მიუწვდომლობა არ წარმოადგენს გადახდილი თანხის დაბრუნების საფუძველს, რადგან შეძენილი ციფრული აქტივის გადაცემა მომხმარებლისთვის უკვე დასრულებულ ფაქტად ითვლება. 
-        <br><br>
-        ვებსაიტის გამოყენებითა და ყიდვის განხორციელებით თქვენ ადასტურებთ, რომ გაეცანით ამ პირობებს, ეთანხმებით მათ და სრულად გაცნობიერებული გაქვთ პროდუქტის თავისებურება.
-    </div>
+    <div class="terms-text">ვებსაიტის მეშვეობით მომხმარებელს ეძლევა შესაძლებლობა შეიძინოს ციფრულ სამყაროში არსებული უნიკალური ვარსკვლავი, რომელიც წარმოადგენს ციფრულ აქტივს. შეძენის დასრულებისთანავე, ვარსკვლავზე საკუთრებისა და სარგებლობის უფლება სრულად გადადის მომხმარებელზე. ვინაიდან ეს არის ექსკლუზიური პროდუქტი, გაყიდვის შემდეგ მისი ხელახლა შეძენა ან სხვა პირზე გადაცემა ჩვენი პლატფორმის მეშვეობით აღარ ხდება.
+
+ვარსკვლავის შეძენასთან ერთად მომხმარებელი იღებს ფიზიკურ სამაჯურს, რომელზეც დატანილია ინდივიდუალური იდენტიფიკაციის კოდი. ეს კოდი თქვენი გასაღებია — ის უკავშირდება კონკრეტულ ციფრულ ვარსკვლავს და იძლევა საშუალებას, გახსნათ და წაიკითხოთ შეძენის პერიოდში დატოვებული შეტყობინება. გთხოვთ, კოდი შეინახოთ უსაფრთხოდ, რადგან მისი დაკარგვის ან სხვა პირისთვის გადაცემის შემთხვევისას, საიტის ადმინისტრაცია პასუხისმგებლობას ვერ აიღებს თქვენს პირად შეტყობინებებზე ან წვდომაზე.
+
+დაბრუნების პოლიტიკა ეყრდნობა მომხმარებელთა უფლებების დაცვის მოქმედ კანონმდებლობას. თუმცა, პროდუქტის სპეციფიკიდან გამომდინარე — რადგან თქვენ მომენტალურად იღებთ წვდომას ციფრულ კონტენტზე და გეგზავნებათ თქვენთვის ინდივიდუალურად მომზადებული სამაჯური — შეძენის განხორციელებით თქვენ ადასტურებთ, რომ უარს ამბობთ ნივთის ყოველგვარი მიზეზის გარეშე დაბრუნების უფლებაზე.
+
+თანხის დაბრუნება შესაძლებელია მხოლოდ იმ შემთხვევაში, თუ შეძენისას დაფიქსირდა ტექნიკური ხარვეზი და თქვენ ფაქტობრივად ვერ მიიღეთ ის მომსახურება, რომელსაც პლატფორმა გპირდებოდათ. ასეთ დროს ჩვენ ვიღებთ ვალდებულებას, უმოკლეს ვადაში გამოვასწოროთ პრობლემა, ხოლო თუ ეს შეუძლებელი აღმოჩნდება, სრულად დაგიბრუნებთ გადახდილ თანხას იმავე მეთოდით, რომლითაც ისარგებლეთ ყიდვისას.
+
+თუ შეძენა წარმატებით დასრულდა და თქვენ მიიღეთ წვდომა ციფრულ აქტივზე, თანხის უკან დაბრუნება აღარ მოხდება. მომხმარებელი აცნობიერებს და ეთანხმება იმას, რომ ციფრული პლატფორმის ბუნებიდან გამომდინარე, საიტის მფლობელი პასუხს არ აგებს მომავალში პლატფორმის ფუნქციონირების შესაძლო შეწყვეტაზე. საიტის მუშაობის ნებისმიერი მიზეზით შეწყვეტა, გაუქმება ან მიუწვდომლობა არ წარმოადგენს გადახდილი თანხის დაბრუნების საფუძველს, რადგან შეძენილი ციფრული აქტივის გადაცემა მომხმარებლისთვის უკვე დასრულებულ ფაქტად ითვლება.
+
+ვებსაიტის გამოყენებითა და ყიდვის განხორციელებით თქვენ ადასტურებთ, რომ გაეცანით ამ პირობებს, ეთანხმებით მათ და სრულად გაცნობიერებული გაქვთ პროდუქტის თავისებურება.</div>
     <button class="buy-btn" onclick="closeM()">გასაგებია</button>
 </div>
 
@@ -161,6 +159,7 @@
     const camera = new THREE.PerspectiveCamera(60, window.innerWidth/window.innerHeight, 10, 100000);
     const renderer = new THREE.WebGLRenderer({ antialias: true });
     renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
     document.body.appendChild(renderer.domElement);
 
     const controls = new THREE.OrbitControls(camera, renderer.domElement);
@@ -182,24 +181,51 @@
     const stars = [];
     let currentFilter = 'all';
 
-    function createGlowTexture(color, isPink = false) {
+    const specialStarIds = [15, 28, 42, 55, 68, 81, 94, 107, 120, 133, 146, 159, 172, 185, 198, 211, 224, 237, 250, 263, 276, 289, 302, 315, 328, 335, 340, 345, 348, 350];
+
+    function createGlowTexture(color, isPink = false, extraBright = false) {
         const canvas = document.createElement('canvas');
         canvas.width = 128; canvas.height = 128;
         const ctx = canvas.getContext('2d');
         const gradient = ctx.createRadialGradient(64, 64, 0, 64, 64, 64);
-        if(isPink) { gradient.addColorStop(0, 'rgba(255, 230, 240, 1)'); gradient.addColorStop(0.3, 'rgba(255, 105, 180, 0.8)'); gradient.addColorStop(1, 'rgba(0, 0, 0, 0)'); }
-        else { gradient.addColorStop(0, 'rgba(255, 255, 255, 1)'); gradient.addColorStop(0.4, color); gradient.addColorStop(1, 'rgba(0, 0, 0, 0)'); }
+        if(isPink) { 
+            gradient.addColorStop(0, 'rgba(255, 230, 240, 1)'); 
+            gradient.addColorStop(0.3, 'rgba(255, 105, 180, 0.8)'); 
+            gradient.addColorStop(1, 'rgba(0, 0, 0, 0)'); 
+        } else { 
+            gradient.addColorStop(0, 'rgba(255, 255, 255, 1)'); 
+            gradient.addColorStop(0.4, color); 
+            gradient.addColorStop(1, 'rgba(0, 0, 0, 0)'); 
+        }
         ctx.fillStyle = gradient; ctx.fillRect(0, 0, 128, 128);
         return new THREE.CanvasTexture(canvas);
     }
 
     function createStar(id, x, y, z, size, color, isPink = false) {
-        const mat = new THREE.SpriteMaterial({ map: createGlowTexture(color, isPink), transparent: true, blending: THREE.AdditiveBlending });
+        const isSpecial = specialStarIds.includes(id);
+        const mat = new THREE.SpriteMaterial({ 
+            map: createGlowTexture(color, isPink, isSpecial), 
+            transparent: true, 
+            blending: THREE.AdditiveBlending 
+        });
         const sprite = new THREE.Sprite(mat);
         sprite.position.set(x, y, z);
-        let fSize = (id === 1) ? 2400 : (isPink ? 1440 : size * 6);
+        
+        let fSize;
+        if (id === 1) fSize = 2400;
+        else if (isPink) fSize = 1440;
+        else if (isSpecial) fSize = 1100;
+        else fSize = size * 6;
+
         sprite.scale.set(fSize, fSize, 1);
-        sprite.userData = { id, baseScale: fSize, sold: false, pending: false, price: (id === 1 ? 149 : 79), starName: "" };
+        sprite.userData = { 
+            id, 
+            baseScale: fSize, 
+            sold: false, 
+            pending: false, 
+            price: (id === 1 ? 149 : (isSpecial ? 89 : 79)), 
+            starName: "" 
+        };
         starGroup.add(sprite);
         stars.push(sprite);
     }
@@ -220,7 +246,6 @@
                 const info = data[s.userData.id];
                 s.userData.sold = info.sold === true || info.sold === "true";
                 s.userData.pending = info.pending === true || info.pending === "true";
-                // სახელი გამოჩნდება მხოლოდ მაშინ, თუ ვარსკვლავი ოფიციალურად გაყიდულია
                 s.userData.starName = s.userData.sold ? (info.starName || "") : "";
             }
         });
@@ -241,7 +266,8 @@
         });
     }
 
-    let activeS = null, lastClickTime = 0;
+    let activeS = null;
+    let lastClickTime = 0;
 
     function select(s) {
         if(!s.visible) return;
@@ -272,18 +298,72 @@
         }
     }
 
+    function resetView() {
+        gsap.to(camera.position, { x: 0, y: 15000, z: 25000, duration: 1.5 });
+        gsap.to(controls.target, { x: 0, y: 0, z: 0, duration: 1.5 });
+        if(activeS) activeS.scale.set(activeS.userData.baseScale, activeS.userData.baseScale, 1);
+        activeS = null; document.getElementById('info-p').style.display = 'none';
+    }
+
+    // ერთიანი სისტემა მაუსისთვის და თაჩისთვის
+    function handleAction(clientX, clientY, isDoubleClick = false) {
+        if(document.elementFromPoint(clientX, clientY).closest('#gui, #modal, #terms-modal')) return;
+        
+        const m = new THREE.Vector2((clientX/window.innerWidth)*2-1, -(clientY/window.innerHeight)*2+1);
+        const ray = new THREE.Raycaster();
+        ray.setFromCamera(m, camera);
+        const hit = ray.intersectObjects(stars.filter(s => s.visible));
+        
+        if(hit.length > 0) {
+            const clicked = hit[0].object;
+            if(isDoubleClick && activeS && activeS.userData.id === clicked.userData.id) {
+                resetView();
+            } else {
+                select(clicked);
+            }
+        }
+    }
+
+    // კომპიუტერისთვის
+    window.addEventListener('click', e => {
+        if (e.pointerType === 'touch') return;
+        const now = Date.now();
+        if (now - lastClickTime < 300) {
+            handleAction(e.clientX, e.clientY, true);
+        } else {
+            handleAction(e.clientX, e.clientY, false);
+        }
+        lastClickTime = now;
+    });
+
+    // ტელეფონისთვის
+    let touchStartT = 0;
+    renderer.domElement.addEventListener('touchstart', (e) => {
+        if(e.touches.length === 1) touchStartT = Date.now();
+        else touchStartT = 0; 
+    }, {passive: true});
+
+    renderer.domElement.addEventListener('touchend', (e) => {
+        const duration = Date.now() - touchStartT;
+        if (touchStartT > 0 && duration < 250 && e.changedTouches.length === 1) {
+            handleAction(e.changedTouches[0].clientX, e.changedTouches[0].clientY, false);
+        }
+    });
+
+    window.searchStar = () => {
+        const val = document.getElementById('sId').value;
+        const s = stars.find(x => x.userData.id == val);
+        if(s) select(s);
+    }
+
     function checkCode() {
         const inputVal = document.getElementById('unlockCode').value.trim();
         if(!inputVal) return alert("შეიყვანეთ კოდი!");
-        
-        // პირდაპირ ვამოწმებთ იმავე ადგილას, სადაც ვარსკვლავია
         db.ref('stars_data/' + activeS.userData.id).once('value').then(snap => {
             const data = snap.val();
             if(data && String(data.code) === String(inputVal)) {
                 document.getElementById('secret-msg').innerText = data.message;
-            } else {
-                alert("არასწორი კოდი!");
-            }
+            } else { alert("არასწორი კოდი!"); }
         });
     }
 
@@ -306,34 +386,7 @@
         }).then(() => {
             alert("მოთხოვნა გაიგზავნა!");
             closeM();
-        }).catch(err => alert("შეცდომა: მონაცემები ვერ გაიგზავნა."));
-    }
-
-    function resetView() {
-        gsap.to(camera.position, { x: 0, y: 15000, z: 25000, duration: 1.5 });
-        gsap.to(controls.target, { x: 0, y: 0, z: 0, duration: 1.5 });
-        if(activeS) activeS.scale.set(activeS.userData.baseScale, activeS.userData.baseScale, 1);
-        activeS = null; document.getElementById('info-p').style.display = 'none';
-    }
-
-    window.addEventListener('pointerup', e => {
-        if(e.target.closest('#gui, #modal, #terms-modal')) return;
-        const m = new THREE.Vector2((e.clientX/window.innerWidth)*2-1, -(e.clientY/window.innerHeight)*2+1);
-        const ray = new THREE.Raycaster();
-        ray.setFromCamera(m, camera);
-        const hit = ray.intersectObjects(stars.filter(s => s.visible));
-        const now = Date.now(), isDoubleClick = (now - lastClickTime < 350);
-        lastClickTime = now;
-        if(hit.length > 0) {
-            const clicked = hit[0].object;
-            if(isDoubleClick && activeS && activeS.userData.id === clicked.userData.id) resetView();
-            else select(clicked);
-        }
-    });
-
-    window.searchStar = () => {
-        const s = stars.find(x => x.userData.id == document.getElementById('sId').value);
-        if(s) select(s);
+        }).catch(err => alert("შეცდომა!"));
     }
 
     document.getElementById('bBtn').onclick = () => { document.getElementById('modal').style.display='block'; document.getElementById('ovl').style.display='block'; }
@@ -346,8 +399,12 @@
         controls.update(); renderer.render(scene, camera);
     }
     animate();
+
+    window.addEventListener('resize', () => {
+        camera.aspect = window.innerWidth / window.innerHeight;
+        camera.updateProjectionMatrix();
+        renderer.setSize(window.innerWidth, window.innerHeight);
+    });
 </script>
 </body>
 </html>
-
-
