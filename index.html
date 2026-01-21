@@ -304,6 +304,16 @@
         if(activeS) activeS.scale.set(activeS.userData.baseScale, activeS.userData.baseScale, 1);
         activeS = null; document.getElementById('info-p').style.display = 'none';
     }
+    // მობილურზე ორჯერ დაჭერისას ხედის დაბრუნება
+    let lastTouchTime = 0;
+    window.addEventListener('touchend', e => {
+        if(e.target.closest('#gui, #modal, #terms-modal')) return;
+        const now = Date.now();
+        if(now - lastTouchTime < 350) {
+            if(activeS) resetView();
+        }
+        lastTouchTime = now;
+    });
 
     // ერთიანი სისტემა მაუსისთვის და თაჩისთვის
     function handleAction(clientX, clientY, isDoubleClick = false) {
@@ -408,3 +418,4 @@
 </script>
 </body>
 </html>
+
