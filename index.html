@@ -305,34 +305,41 @@
         activeS = null; document.getElementById('info-p').style.display = 'none';
     }
     // მობილურზე ორჯერ დაჭერისას ხედის დაბრუნება
-    let lastTouchTime = 0;
-    window.addEventListener('touchend', e => {
-        if(e.target.closest('#gui, #modal, #terms-modal')) return;
-        const now = Date.now();
-        if(now - lastTouchTime < 350) {
-            if(activeS) resetView();
-        }
-        lastTouchTime = now;
-    });
+  let lastTouchTime = 0;
+window.addEventListener('touchend', e => {
+    if(e.target.closest('#gui, #modal, #terms-modal')) return;
+    
+    const now = Date.now();
+    if(now - lastTouchTime < 350) {
+        // როცა ორჯერ სწრაფად ვეხებით ეკრანს, ვიძახებთ handleAction-ს 
+        // და ვეუბნებით, რომ ეს არის Double Click (true)
+        const touch = e.changedTouches[0];
+        handleAction(touch.clientX, touch.clientY, true);
+    }
+    lastTouchTime = now;
+});
+    
 
     // ერთიანი სისტემა მაუსისთვის და თაჩისთვის
     function handleAction(clientX, clientY, isDoubleClick = false) {
-        if(document.elementFromPoint(clientX, clientY).closest('#gui, #modal, #terms-modal')) return;
-        
-        const m = new THREE.Vector2((clientX/window.innerWidth)*2-1, -(clientY/window.innerHeight)*2+1);
-        const ray = new THREE.Raycaster();
-        ray.setFromCamera(m, camera);
-        const hit = ray.intersectObjects(stars.filter(s => s.visible));
-        
-        if(hit.length > 0) {
-            const clicked = hit[0].object;
-            if(isDoubleClick && activeS && activeS.userData.id === clicked.userData.id) {
-                resetView();
-            } else {
-                select(clicked);
-            }
+    if(document.elementFromPoint(clientX, clientY).closest('#gui, #modal, #terms-modal')) return;
+    
+    const m = new THREE.Vector2((clientX/window.innerWidth)*2-1, -(clientY/window.innerHeight)*2+1);
+    const ray = new THREE.Raycaster();
+    ray.setFromCamera(m, camera);
+    const hit = ray.intersectObjects(stars.filter(s => s.visible));
+    
+    if(hit.length > 0) {
+        const clicked = hit[0].object;
+        // მხოლოდ თუ ორჯერ დავაჭირეთ ვარსკვლავს, მაშინ მოხდეს რესეტი
+        if(isDoubleClick) {
+            resetView();
+        } else {
+            select(clicked);
         }
     }
+    // თუ hit.length არის 0 (ანუ ცარიელ ადგილს დავაჭირეთ), არაფერი არ მოხდება
+}
 
     // კომპიუტერისთვის
     window.addEventListener('click', e => {
@@ -418,4 +425,5 @@
 </script>
 </body>
 </html>
+
 
